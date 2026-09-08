@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chat — BID</title>
+  <meta name="description" content="Conversa con BID para validar tu idea de negocio." />
+  <meta name="theme-color" content="#0a0a0f" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='8' y='8' width='16' height='16' rx='4' transform='rotate(45 16 16)' fill='%238b5cf6'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/styles.css" />
+  <script src="../js/icons.js" defer></script>
+  <script src="../js/app-chat.js" defer></script>
+</head>
+<body>
+  <!-- Navbar app -->
+  <nav class="navbar">
+    <div class="container navbar-inner">
+      <a href="index.html" class="logo" aria-label="BID — inicio">
+        <svg class="logo-icon" width="30" height="30" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs>
+            <linearGradient id="app-logo-gradient" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#8b5cf6" />
+              <stop offset="1" stop-color="#a78bfa" />
+            </linearGradient>
+          </defs>
+          <rect x="8" y="8" width="16" height="16" rx="4" transform="rotate(45 16 16)" fill="url(#app-logo-gradient)" />
+        </svg>
+        <span class="logo-text">BID</span>
+      </a>
+      <div class="navbar-actions">
+        <a href="casos.html" class="nav-link">Mis casos</a>
+        <a href="chat.html" class="nav-link active">Nueva conversación</a>
+        <div class="user-chip">
+          <div class="user-avatar">U</div>
+          <div class="user-info">
+            <div class="user-name">Usuario Demo</div>
+            <div class="user-email">demo@bid.ai</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="chat-screen">
+    <div id="chat-messages" class="chat-messages">
+      <!-- Welcome screen -->
+      <div id="welcome" class="welcome-screen">
+        <div class="welcome-logo" id="welcome-logo-placeholder"></div>
+        <h2 class="welcome-title">¿Qué problema quieres resolver hoy?</h2>
+        <p class="welcome-sub">Describe tu idea o elige un punto de partida para comenzar a validar tu oportunidad de negocio.</p>
+        <div class="prompt-grid" id="prompt-grid"></div>
+        <p class="welcome-hint">O escribe directamente tu idea en el campo de texto de abajo</p>
+      </div>
+      <!-- Thread de mensajes -->
+      <div id="thread" class="chat-column"></div>
+      <!-- Bottom reference para auto-scroll -->
+      <div id="bottom-ref"></div>
+    </div>
+
+    <!-- Input fijo al fondo -->
+    <div class="chat-input-wrap">
+      <div class="chat-input-inner">
+        <div class="chat-input-box" id="chat-input-box">
+          <textarea class="chat-textarea" id="chat-textarea" placeholder="Describe tu idea de negocio..." rows="1"></textarea>
+          <button class="send-btn" id="send-btn" aria-label="Enviar"></button>
+        </div>
+        <p class="chat-legal">BID puede cometer errores. Verifica las recomendaciones antes de tomar decisiones importantes.</p>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

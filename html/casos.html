@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mis casos — BID</title>
+  <meta name="description" content="Gestiona y revisa tus ideas de negocio en BID." />
+  <meta name="theme-color" content="#0a0a0f" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='8' y='8' width='16' height='16' rx='4' transform='rotate(45 16 16)' fill='%238b5cf6'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/styles.css" />
+  <script src="../js/icons.js" defer></script>
+  <script src="../js/app-casos.js" defer></script>
+</head>
+<body>
+  <!-- Navbar app -->
+  <nav class="navbar">
+    <div class="container navbar-inner">
+      <a href="index.html" class="logo" aria-label="BID — inicio">
+        <svg class="logo-icon" width="30" height="30" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs>
+            <linearGradient id="app-logo-gradient" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#8b5cf6" />
+              <stop offset="1" stop-color="#a78bfa" />
+            </linearGradient>
+          </defs>
+          <rect x="8" y="8" width="16" height="16" rx="4" transform="rotate(45 16 16)" fill="url(#app-logo-gradient)" />
+        </svg>
+        <span class="logo-text">BID</span>
+      </a>
+      <div class="navbar-actions">
+        <a href="casos.html" class="nav-link active">Mis casos</a>
+        <a href="chat.html" class="nav-link">Nueva conversación</a>
+        <div class="user-chip">
+          <div class="user-avatar">U</div>
+          <div class="user-info">
+            <div class="user-name">Usuario Demo</div>
+            <div class="user-email">demo@bid.ai</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <div class="page">
+      <div class="container">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Mis ideas de negocio</h1>
+            <p class="page-subtitle"><span id="casos-count">8 casos</span> · Ordenados por actividad reciente</p>
+          </div>
+          <a href="chat.html" class="btn btn-primary">Nueva idea</a>
+        </div>
+
+        <div class="search-bar">
+          <span class="search-icon" id="search-icon-placeholder"></span>
+          <input type="text" class="search-input" id="search-input" placeholder="Buscar por título o etiqueta..." />
+          <button class="search-tune" id="search-tune-btn" aria-label="Filtros"></button>
+        </div>
+
+        <div id="casos-grid" class="cases-grid"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-container">
+      <span class="footer-copy">BID © 2026</span>
+      <div class="footer-links">
+        <a href="#" data-fake class="footer-link">Privacidad</a>
+        <span class="footer-sep">|</span>
+        <a href="#" data-fake class="footer-link">Términos</a>
+        <span class="footer-sep">|</span>
+        <a href="#" data-fake class="footer-link">Contacto</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
