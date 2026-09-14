@@ -1,21 +1,17 @@
 /* ================================================================
-   BID — Chat: lógica mock del asistente de validación de ideas
+   BID — Chat: asistente mock de validación de ideas
+   (persistido por usuario vía BIDChat)
    ================================================================ */
 
 (function () {
   'use strict';
 
-  // ---------- Datos mock ----------
-  const mockCases = [
-    { id: '1', title: 'App de delivery para mascotas' },
-    { id: '2', title: 'Plataforma de cursos online B2B' },
-    { id: '3', title: 'SaaS de facturación electrónica para PyMEs' },
-    { id: '4', title: 'Marketplace de servicios legales' },
-    { id: '5', title: 'Herramienta IA para análisis de contratos' },
-    { id: '6', title: 'App de bienestar mental para empleados' },
-    { id: '7', title: 'Copiloto IA para soporte al cliente' },
-    { id: '8', title: 'Generador IA de propuestas comerciales' },
-  ];
+  const session = BIDAuth.currentUser();
+  if (!session) {
+    window.location.href = 'login.html';
+    return;
+  }
+  const userEmail = session.email;
 
   // Preguntas de clarificación
   const CLARIFYING_QUESTIONS = [
@@ -108,9 +104,9 @@ He identificado **3 ideas de negocio** ordenadas por potencial:`;
   ];
 
   // ---------- Estado ----------
+  let activeChatId = null;
   let userMsgCount = 0;
   let isProcessing = false;
-  let casoTitle = null;
 
   // ---------- DOM refs ----------
   const welcomeEl = document.getElementById('welcome');
@@ -322,6 +318,34 @@ He identificado **3 ideas de negocio** ordenadas por potencial:`;
     if (el) el.remove();
   }
 
+  // ---------- Persistencia ----------
+  function persistMessage(role, content) {
+    if (!activeChatId) return null;
+    const chat = BIDChat.addMessage(userEmail, activeChatId, { role, content });
+    return chat;
+  }
+
+  function renderStoredMessage(message) {
+    if (message.role === 'user') {
+      addUserMessage(message.content);
+    } else if (message.content === '__ANALYSIS__') {
+      addBotMessage(renderAnalysis());
+    } else {
+      addBotMessage(renderMd(message.content));
+    }
+  }
+
+  function loadChat(chatId) {
+    const chat = BIDChat.get(userEmail, chatId);
+    if (!chat) return null;
+    activeChatId = chatId;
+    welcomeEl.classList.add('hidden');
+    threadEl.textContent = '';
+    chat.messages.forEach(renderStoredMessage);
+    userMsgCount = chat.messages.filter(m => m.role === 'user').length;
+    return chat;
+  }
+
   // ---------- Lógica de respuestas ----------
   function getBotResponse(text) {
     const lower = text.toLowerCase();
@@ -346,8 +370,14 @@ He identificado **3 ideas de negocio** ordenadas por potencial:`;
     isProcessing = true;
     updateSendBtn();
 
+    // Crear chat recién con el primer mensaje (evita chats huérfanos)
+    if (!activeChatId) {
+      activeChatId = BIDChat.create(userEmail).id;
+    }
+
     addUserMessage(text);
     userMsgCount++;
+    persistMessage('user', text);
 
     const response = getBotResponse(text);
 
@@ -363,6 +393,8 @@ He identificado **3 ideas de negocio** ordenadas por potencial:`;
       } else {
         addBotMessage(renderMd(response));
       }
+
+      persistMessage('assistant', response);
 
       isProcessing = false;
       updateSendBtn();
@@ -453,17 +485,17 @@ He identificado **3 ideas de negocio** ordenadas por potencial:`;
     // Render prompt cards
     renderPrompts();
 
-    // Soporte ?caso=ID
+    // Restaurar conversación desde ?caso=ID
     const params = new URLSearchParams(window.location.search);
     const casoId = params.get('caso');
+
     if (casoId) {
-      const caso = mockCases.find(c => c.id === casoId);
-      if (caso) {
-        casoTitle = caso.title;
-        // Ocultar welcome, iniciar con mensaje del bot
-        welcomeEl.classList.add('hidden');
-        addBotMessage(renderMd(`¡Hola! Retomamos tu caso **«${escapeHtml(casoTitle)}»**. ¿En qué te ayudo hoy?`));
-        userMsgCount = 1; // El próximo mensaje del usuario devuelve la 2.ª pregunta
+      const chat = loadChat(casoId);
+      if (chat && chat.messages.length === 0) {
+        // Caso nuevo recién creado: abrir con un saludo persistido
+        addBotMessage(renderMd('¡Hola! Empezamos un nuevo **caso**. Contame tu idea o el problema que querés resolver y voy a hacerte algunas preguntas para analizar la oportunidad.'));
+        persistMessage('assistant', '¡Hola! Empezamos un nuevo **caso**. Contame tu idea o el problema que querés resolver y voy a hacerte algunas preguntas para analizar la oportunidad.');
+        userMsgCount = 0;
       }
     }
 
