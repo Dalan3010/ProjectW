@@ -1,114 +1,39 @@
-/* ================================================================
-   BID — Chat: asistente mock de validación de ideas
-   (persistido por usuario vía BIDChat)
-   ================================================================ */
+// BID — Chat del asistente con persistencia real por usuario.
+// El guion (preguntas, análisis, prompt cards) vive en assistant.js; acá solo
+// queda el comportamiento: render, typing simulado y guardado en localStorage.
 
-(function () {
-  'use strict';
+import { chats } from '../chats.js';
+import { icon } from '../icons.js';
+import {
+  ANALYSIS_SENTINEL,
+  CLARIFYING_QUESTIONS,
+  FALLBACK_RESPONSE,
+  PROMPTS,
+  ANALYSIS_CONTENT,
+  CONFIDENCE,
+  ASSESSMENT_DATA,
+  IDEAS,
+  NEXT_STEPS,
+} from '../assistant.js';
+import {
+  escapeHtml,
+  requireSession,
+  renderUserChip,
+  renderLogoutButton,
+  bindFakeLinks,
+} from '../ui.js';
 
-  const session = BIDAuth.currentUser();
-  if (!session) {
-    window.location.href = 'login.html';
-    return;
-  }
+const session = requireSession();
+
+if (session) {
   const userEmail = session.email;
-
-  // Preguntas de clarificación
-  const CLARIFYING_QUESTIONS = [
-    '¡Excelente punto de partida! Para entender mejor el problema, necesito hacerte algunas preguntas:\n\n**¿Quién experimenta este problema más frecuentemente?**\n- ¿Son empresas (B2B) o personas individuales (B2C)?\n- ¿Qué rango de edad o perfil tienen?\n- ¿En qué industria o contexto ocurre?\n\nCuéntame con el mayor detalle posible.',
-
-    'Perfecto, eso me da más contexto. Ahora profundicemos en la intensidad del problema:\n\n**¿Con qué frecuencia enfrentan este problema?**\n- ¿Es algo diario, semanal, mensual?\n- ¿Cuánto tiempo pierden o cuánto dinero les cuesta actualmente?\n- ¿Ya intentaron resolver esto con alguna solución existente? ¿Por qué no les funcionó?',
-
-    'Muy interesante. Esto me ayuda a mapear la oportunidad real.\n\n**Una última pregunta antes de generar el análisis:**\n- ¿Tienes acceso a potenciales clientes para validar esta idea?\n- ¿Cuánto crees que estarían dispuestos a pagar por una solución?\n- ¿Existe alguna regulación o barrera importante en este sector?\n\nCon esto podré darte un análisis completo.',
-  ];
-
-  const FALLBACK_RESPONSE = 'Entiendo tu punto. Esto me da una perspectiva clara sobre la oportunidad.\n\nPara hacer el análisis más preciso: **¿podrías darme más detalles sobre el impacto económico o de tiempo que este problema causa?** Eso me ayudará a estimar el tamaño real del mercado y la disposición a pagar.';
-
-  // Prompt cards de bienvenida
-  const PROMPTS = [
-    { icon: 'search',       title: 'Explorar un problema',     desc: 'Tengo una molestia o ineficiencia que quiero convertir en oportunidad' },
-    { icon: 'lightbulb',    title: 'Validar una idea',         desc: 'Tengo una idea de negocio y quiero saber si realmente tiene mercado' },
-    { icon: 'trending_up',  title: 'Analizar una tendencia',   desc: 'Vi una tendencia emergente y quiero saber cómo monetizarla' },
-    { icon: 'group',        title: 'Entender un segmento',     desc: 'Conozco un grupo de personas con un dolor específico y no sé cómo servirles' },
-  ];
-
-  // Análisis completo (4to mensaje)
-  const ANALYSIS_CONTENT = `
-# Análisis Completo de tu Oportunidad de Negocio
-
-Basado en toda la información que compartiste, aquí está mi evaluación:
-
-## Diagnóstico del Problema
-El problema que describes tiene características de una **ineficiencia sistémica** con alta frecuencia e impacto moderado. Esto es positivo porque significa que hay disposición real a pagar por una solución.
-
-## Segmento Objetivo
-**PYMEs con 10-100 empleados en Latinoamérica** → Alta densidad del problema, capacidad de pago, ciclo de ventas manejable.
-
-## Evaluación de Viabilidad: **ALTA** ✓
-
-He identificado **3 ideas de negocio** ordenadas por potencial:`;
-
-  const CONFIDENCE = 76;
-
-  const ASSESSMENT_DATA = {
-    targetSegment: 'PYMEs con 10-100 empleados en Latinoamérica',
-    urgency: 4,
-    frequency: 4,
-    severity: 3,
-    willingnessToPay: 3,
-    risks: [
-      'Competencia de grandes jugadores establecidos',
-      'Ciclo de venta largo en B2B',
-      'Necesidad de educación del mercado',
-    ],
-    viability: 'high',
-    overallScore: 76,
-  };
-
-  const IDEAS = [
-    {
-      title: 'Plataforma SaaS de Gestión Automatizada',
-      desc: 'Solución en la nube que automatiza el proceso principal del problema, reduciendo tiempo y errores humanos mediante IA.',
-      revenue: 'Suscripción mensual ($29-$199/mes)',
-      difficulty: 'medium',
-      time: 'months',
-      score: 82,
-      tags: ['SaaS', 'IA', 'Automatización'],
-    },
-    {
-      title: 'Marketplace de Servicios Especializados',
-      desc: 'Conecta a quienes tienen el problema con expertos que pueden resolverlo, cobrando comisión por transacción.',
-      revenue: 'Comisión del 15-20% por transacción',
-      difficulty: 'low',
-      time: 'weeks',
-      score: 74,
-      tags: ['Marketplace', 'B2B2C', 'Network Effect'],
-    },
-    {
-      title: 'Herramienta de Análisis con IA',
-      desc: 'Dashboard inteligente que procesa datos del problema y genera insights accionables con recomendaciones personalizadas.',
-      revenue: 'Freemium + Plan Pro ($49/mes)',
-      difficulty: 'high',
-      time: 'quarters',
-      score: 91,
-      tags: ['IA', 'Analytics', 'Data'],
-    },
-  ];
-
-  const NEXT_STEPS = [
-    'Entrevistar a 5-10 potenciales clientes esta semana',
-    'Crear un landing page con una lista de espera',
-    'Construir un prototipo mínimo (mockup o wireframe)',
-    'Validar disposición a pagar con una oferta real',
-    'Documentar los aprendizajes y iterar',
-  ];
 
   // ---------- Estado ----------
   let activeChatId = null;
   let userMsgCount = 0;
   let isProcessing = false;
 
-  // ---------- DOM refs ----------
+  // ---------- DOM ----------
   const welcomeEl = document.getElementById('welcome');
   const threadEl = document.getElementById('thread');
   const textarea = document.getElementById('chat-textarea');
@@ -129,11 +54,10 @@ He identificado **3 ideas de negocio** ordenadas por potencial:`;
     }, 50);
   }
 
-  function escapeHtml(str) {
-    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  }
+  renderUserChip(session);
+  renderLogoutButton(session);
 
-  // Mini renderer markdown (datos mock controlados)
+  // ---------- Mini renderer markdown (datos mock controlados) ----------
   function renderMd(text) {
     const lines = text.split('\n');
     let html = '';
@@ -321,14 +245,14 @@ He identificado **3 ideas de negocio** ordenadas por potencial:`;
   // ---------- Persistencia ----------
   function persistMessage(role, content) {
     if (!activeChatId) return null;
-    const chat = BIDChat.addMessage(userEmail, activeChatId, { role, content });
-    return chat;
+    return chats.addMessage(userEmail, activeChatId, { role, content });
   }
 
+  // Al reabrir, el sentinel del análisis se regenera como HTML completo.
   function renderStoredMessage(message) {
     if (message.role === 'user') {
       addUserMessage(message.content);
-    } else if (message.content === '__ANALYSIS__') {
+    } else if (message.content === ANALYSIS_SENTINEL) {
       addBotMessage(renderAnalysis());
     } else {
       addBotMessage(renderMd(message.content));
@@ -336,13 +260,14 @@ He identificado **3 ideas de negocio** ordenadas por potencial:`;
   }
 
   function loadChat(chatId) {
-    const chat = BIDChat.get(userEmail, chatId);
+    const chat = chats.get(userEmail, chatId);
     if (!chat) return null;
     activeChatId = chatId;
     welcomeEl.classList.add('hidden');
     threadEl.textContent = '';
     chat.messages.forEach(renderStoredMessage);
-    userMsgCount = chat.messages.filter(m => m.role === 'user').length;
+    // El contador se reconstruye del historial real, no de una suposición.
+    userMsgCount = chat.messages.filter((m) => m.role === 'user').length;
     return chat;
   }
 
@@ -360,7 +285,7 @@ He identificado **3 ideas de negocio** ordenadas por potencial:`;
     if (userMsgCount === 3) return CLARIFYING_QUESTIONS[2];
 
     // 4to mensaje → análisis completo
-    if (userMsgCount === 4) return '__ANALYSIS__';
+    if (userMsgCount === 4) return ANALYSIS_SENTINEL;
 
     return FALLBACK_RESPONSE;
   }
@@ -370,9 +295,9 @@ He identificado **3 ideas de negocio** ordenadas por potencial:`;
     isProcessing = true;
     updateSendBtn();
 
-    // Crear chat recién con el primer mensaje (evita chats huérfanos)
+    // El chat nace recién con el primer mensaje: evita conversaciones huérfanas.
     if (!activeChatId) {
-      activeChatId = BIDChat.create(userEmail).id;
+      activeChatId = chats.create(userEmail).id;
     }
 
     addUserMessage(text);
@@ -388,12 +313,13 @@ He identificado **3 ideas de negocio** ordenadas por potencial:`;
     setTimeout(() => {
       removeTyping();
 
-      if (response === '__ANALYSIS__') {
+      if (response === ANALYSIS_SENTINEL) {
         addBotMessage(renderAnalysis());
       } else {
         addBotMessage(renderMd(response));
       }
 
+      // El sentinel se guarda tal cual; al reabrir se regenera el HTML.
       persistMessage('assistant', response);
 
       isProcessing = false;
@@ -442,7 +368,6 @@ He identificado **3 ideas de negocio** ordenadas por potencial:`;
 
   // ---------- Welcome prompts ----------
   function renderPrompts() {
-    if (!promptGrid || typeof ICONS === 'undefined') return;
     promptGrid.innerHTML = PROMPTS.map(p => `
       <button class="prompt-card" data-prompt="${escapeHtml(p.title)}">
         <div class="prompt-icon">${icon(p.icon, 22)}</div>
@@ -464,59 +389,53 @@ He identificado **3 ideas de negocio** ordenadas por potencial:`;
   }
 
   // ---------- Init ----------
-  document.addEventListener('DOMContentLoaded', () => {
-    // Logo de bienvenida
-    if (welcomeLogo) {
-      welcomeLogo.innerHTML = `
-        <svg width="44" height="44" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <defs>
-            <linearGradient id="welcome-logo-grad" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stop-color="#8b5cf6" />
-              <stop offset="1" stop-color="#a78bfa" />
-            </linearGradient>
-          </defs>
-          <rect x="8" y="8" width="16" height="16" rx="4" transform="rotate(45 16 16)" fill="url(#welcome-logo-grad)" />
-        </svg>`;
+  // Logo de bienvenida
+  welcomeLogo.innerHTML = `
+    <svg width="44" height="44" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs>
+        <linearGradient id="welcome-logo-grad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#8b5cf6" />
+          <stop offset="1" stop-color="#a78bfa" />
+        </linearGradient>
+      </defs>
+      <rect x="8" y="8" width="16" height="16" rx="4" transform="rotate(45 16 16)" fill="url(#welcome-logo-grad)" />
+    </svg>`;
+
+  // Estado inicial del botón enviar (deshabilitado, sin texto)
+  updateSendBtn();
+
+  // Render prompt cards
+  renderPrompts();
+
+  // Restaurar conversación desde ?caso=ID
+  const params = new URLSearchParams(window.location.search);
+  const casoId = params.get('caso');
+
+  if (casoId) {
+    const chat = loadChat(casoId);
+    if (chat && chat.messages.length === 0) {
+      // Caso recién creado sin mensajes: abrimos con un saludo que queda persistido.
+      const greeting = '¡Hola! Empezamos un nuevo **caso**. Contame tu idea o el problema que querés resolver y voy a hacerte algunas preguntas para analizar la oportunidad.';
+      addBotMessage(renderMd(greeting));
+      persistMessage('assistant', greeting);
+      userMsgCount = 0;
     }
+  }
 
-    // Icono del botón send
-    sendBtn.innerHTML = icon('send', 16);
-
-    // Render prompt cards
-    renderPrompts();
-
-    // Restaurar conversación desde ?caso=ID
-    const params = new URLSearchParams(window.location.search);
-    const casoId = params.get('caso');
-
-    if (casoId) {
-      const chat = loadChat(casoId);
-      if (chat && chat.messages.length === 0) {
-        // Caso nuevo recién creado: abrir con un saludo persistido
-        addBotMessage(renderMd('¡Hola! Empezamos un nuevo **caso**. Contame tu idea o el problema que querés resolver y voy a hacerte algunas preguntas para analizar la oportunidad.'));
-        persistMessage('assistant', '¡Hola! Empezamos un nuevo **caso**. Contame tu idea o el problema que querés resolver y voy a hacerte algunas preguntas para analizar la oportunidad.');
-        userMsgCount = 0;
-      }
-    }
-
-    // Eventos textarea
-    textarea.addEventListener('input', () => {
-      autoGrow();
-      updateSendBtn();
-    });
-
-    textarea.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        handleSend();
-      }
-    });
-
-    sendBtn.addEventListener('click', handleSend);
-
-    // Enlaces ficticios
-    document.querySelectorAll('[data-fake]').forEach(link => {
-      link.addEventListener('click', e => e.preventDefault());
-    });
+  // Eventos textarea
+  textarea.addEventListener('input', () => {
+    autoGrow();
+    updateSendBtn();
   });
-})();
+
+  textarea.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  });
+
+  sendBtn.addEventListener('click', handleSend);
+
+  bindFakeLinks();
+}

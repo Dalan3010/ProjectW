@@ -1,33 +1,43 @@
-// BID — Capa de persistencia local (localStorage)
+// BID — Capa de persistencia sobre localStorage, con fallback defensivo.
+// Todo pasa por acá: si el almacenamiento falla (modo privado, cuota llena,
+// JSON corrupto), la app sigue funcionando con valores por defecto.
 
-const BIDStorage = (() => {
-  const NAMESPACE = "bid.";
+export class StorageService {
+  constructor(prefix = 'bid.') {
+    this.prefix = prefix;
+  }
 
-  function get(key, fallback = null) {
+  key(name) {
+    return `${this.prefix}${name}`;
+  }
+
+  get(name, fallback = null) {
     try {
-      const raw = localStorage.getItem(NAMESPACE + key);
+      const raw = window.localStorage.getItem(this.key(name));
       return raw === null ? fallback : JSON.parse(raw);
     } catch {
+      // JSON inválido o almacenamiento bloqueado: devolvemos el fallback.
       return fallback;
     }
   }
 
-  function set(key, value) {
+  set(name, value) {
     try {
-      localStorage.setItem(NAMESPACE + key, JSON.stringify(value));
+      window.localStorage.setItem(this.key(name), JSON.stringify(value));
       return true;
     } catch {
+      // Cuota llena o modo privado: avisamos, pero no rompemos la app.
       return false;
     }
   }
 
-  function remove(key) {
+  remove(name) {
     try {
-      localStorage.removeItem(NAMESPACE + key);
+      window.localStorage.removeItem(this.key(name));
     } catch {
-      // swallowed: removing a missing key is a no-op
+      // Sin almacenamiento no hay nada que limpiar.
     }
   }
+}
 
-  return { get, set, remove };
-})();
+export const storage = new StorageService('bid.');

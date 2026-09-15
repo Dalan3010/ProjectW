@@ -1,80 +1,94 @@
-// BID — Persistencia local de chats por usuario
+// BID — CRUD de conversaciones por usuario.
+// Estructura en storage: bid.chats → { [email]: chat[] } con el más reciente primero.
 
-const BIDChat = (() => {
-  const CHATS_KEY = "chats";
+import { storage } from './storage.js';
 
-  function generateId() {
-    if (window.crypto && crypto.randomUUID) {
-      return crypto.randomUUID();
-    }
-    return `c_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+export const CHATS_KEY = 'chats';
+const DEFAULT_TITLE = 'Nueva conversación';
+const TITLE_MAX = 48;
+
+// UUID nativo si está disponible; si no, un id único razonable para esta app.
+export function generateId() {
+  if (window.crypto && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  return `c_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
+export class ChatService {
+  constructor(storage) {
+    this.storage = storage;
   }
 
-  function getAll() {
-    return BIDStorage.get(CHATS_KEY, {});
+  allChats() {
+    const chats = this.storage.get(CHATS_KEY, {});
+    // Defensa contra datos corruptos: si no es un objeto, arrancamos de cero.
+    return chats && typeof chats === 'object' ? chats : {};
   }
 
-  function saveAll(chats) {
-    return BIDStorage.set(CHATS_KEY, chats);
+  // Copia ordenada: nunca exponemos el array guardado para que nadie lo mute.
+  list(userEmail) {
+    const userChats = this.allChats()[userEmail] || [];
+    return userChats.slice().sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
   }
 
-  function chatsFor(userEmail) {
-    return getAll()[userEmail] || [];
+  get(userEmail, chatId) {
+    const chat = this.list(userEmail).find((c) => c.id === chatId);
+    return chat ? { ...chat, messages: chat.messages.slice() } : null;
   }
 
-  function saveChats(userEmail, chats) {
-    const all = getAll();
-    all[userEmail] = chats;
-    saveAll(all);
-  }
-
-  function topTitleFor(messages) {
-    const first = messages.find((message) => message.role === "user");
-    const snippet = (first && first.content.trim()) || "Nueva conversación";
-    return snippet.length > 48 ? `${snippet.slice(0, 48)}…` : snippet;
-  }
-
-  function create(userEmail, { title } = {}) {
+  create(userEmail, { title } = {}) {
+    const now = new Date().toISOString();
     const chat = {
       id: generateId(),
-      title: title || "Nueva conversación",
+      title: title || DEFAULT_TITLE,
       messages: [],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: now,
+      updatedAt: now,
     };
-    saveChats(userEmail, [chat, ...chatsFor(userEmail)]);
+
+    const all = this.allChats();
+    all[userEmail] = [chat, ...(all[userEmail] || [])];
+    this.storage.set(CHATS_KEY, all);
     return chat;
   }
 
-  function list(userEmail) {
-    return chatsFor(userEmail).slice().sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  remove(userEmail, chatId) {
+    const all = this.allChats();
+    const userChats = all[userEmail] || [];
+    const rest = userChats.filter((c) => c.id !== chatId);
+    if (rest.length === userChats.length) return false;
+    all[userEmail] = rest;
+    this.storage.set(CHATS_KEY, all);
+    return true;
   }
 
-  function get(userEmail, chatId) {
-    return chatsFor(userEmail).find((chat) => chat.id === chatId) || null;
-  }
+  addMessage(userEmail, chatId, { role, content }) {
+    const all = this.allChats();
+    const userChats = (all[userEmail] || []).slice();
+    const index = userChats.findIndex((c) => c.id === chatId);
+    if (index === -1) return null;
 
-  function remove(userEmail, chatId) {
-    const chats = chatsFor(userEmail).filter((chat) => chat.id !== chatId);
-    saveChats(userEmail, chats);
-  }
+    // Copia antes de guardar: el objeto del store nunca se muta en su posición.
+    const chat = { ...userChats[index] };
+    const message = { role, content, createdAt: new Date().toISOString() };
+    chat.messages = (chat.messages || []).concat(message);
+    chat.updatedAt = message.createdAt;
 
-  function addMessage(userEmail, chatId, { role, content }) {
-    const chats = chatsFor(userEmail);
-    const chat = chats.find((item) => item.id === chatId);
-    if (!chat) return null;
-    chat.messages.push({
-      role,
-      content,
-      createdAt: new Date().toISOString(),
-    });
-    chat.updatedAt = new Date().toISOString();
-    if (chat.title === "Nueva conversación") {
-      chat.title = topTitleFor(chat.messages);
+    // La conversación se bautiza con el primer mensaje del usuario.
+    if (chat.title === DEFAULT_TITLE) {
+      const firstUser = chat.messages.find((m) => m.role === 'user');
+      if (firstUser) {
+        const snippet = firstUser.content.trim();
+        chat.title = snippet.length > TITLE_MAX ? `${snippet.slice(0, TITLE_MAX)}…` : snippet;
+      }
     }
-    saveChats(userEmail, [...chats]);
+
+    userChats[index] = chat;
+    all[userEmail] = userChats;
+    this.storage.set(CHATS_KEY, all);
     return chat;
   }
+}
 
-  return { create, list, get, remove, addMessage };
-})();
+export const chats = new ChatService(storage);

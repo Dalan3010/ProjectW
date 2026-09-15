@@ -1,6 +1,6 @@
 /* BID — Iconos inline estilo Feather/Lucide (stroke currentColor, viewBox 0 0 24 24) */
 
-const ICONS = {
+export const ICONS = {
   add: '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
 
   search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>',
@@ -47,7 +47,7 @@ const ICONS = {
  * @param {string} [extraClass=''] — clases CSS adicionales
  * @returns {string} SVG string
  */
-function icon(name, size = 22, extraClass = '') {
+export function icon(name, size = 22, extraClass = '') {
   const inner = ICONS[name] || '';
   const cls = extraClass ? ` class="${extraClass}"` : '';
   return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"${cls} aria-hidden="true">${inner}</svg>`;
