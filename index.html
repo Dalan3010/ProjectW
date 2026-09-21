@@ -6,21 +6,204 @@
   <title>BID — De la idea al negocio</title>
   <meta name="description" content="Convierte tus ideas en oportunidades de negocio con ayuda de inteligencia artificial." />
   <meta name="theme-color" content="#0a0a0f" />
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='8' y='8' width='16' height='16' rx='4' transform='rotate(45 16 16)' fill='%238b5cf6'/%3E%3C/svg%3E" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='8' y='8' width='16' height='16' rx='4' transform='rotate(45 16 16)' fill='%237c3aed'/%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <!-- Constelaciones del zodíaco (decorativas, detrás de todo el contenido) -->
+  <div class="zodiac-background" aria-hidden="true">
+    <div class="constellation cz-aries" style="top: 3%; left: -70px; width: 240px; --z-o: 0.38; --z-o2: 0.56; animation-duration: 26s; animation-delay: -3s;">
+      <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M32 58 L44 46 L58 40 L74 52" stroke="rgba(231, 231, 235, 0.45)" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round" />
+        <circle cx="32" cy="58" r="1.1" fill="#e4e4e7" />
+        <circle cx="44" cy="46" r="0.9" fill="#d4d4d8" />
+        <circle cx="58" cy="40" r="1.8" fill="#c4b5fd" class="cz-glow-violet" />
+        <circle cx="74" cy="52" r="1" fill="#e4e4e7" />
+        <circle cx="28" cy="66" r="0.7" fill="#a1a1aa" />
+        <circle cx="80" cy="60" r="0.6" fill="#bfdbfe" opacity="0.7" />
+      </svg>
+    </div>
+
+    <div class="constellation cz-taurus" style="top: 7%; right: -80px; width: 260px; --z-o: 0.44; --z-o2: 0.62; animation-duration: 24s; animation-delay: -6s;">
+      <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M30 32 L38 46 L46 52 M44 54 L64 30 L78 40 M46 54 L76 56" stroke="rgba(231, 231, 235, 0.45)" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round" />
+        <circle cx="46" cy="54" r="2" fill="#c4b5fd" class="cz-glow-violet" />
+        <circle cx="30" cy="32" r="1" fill="#e4e4e7" />
+        <circle cx="38" cy="46" r="0.9" fill="#d4d4d8" />
+        <circle cx="64" cy="30" r="1.1" fill="#e4e4e7" />
+        <circle cx="78" cy="40" r="0.8" fill="#e4e4e7" />
+        <circle cx="76" cy="56" r="0.9" fill="#bfdbfe" />
+        <circle cx="88" cy="62" r="0.6" fill="#bfdbfe" opacity="0.6" />
+      </svg>
+    </div>
+
+    <div class="constellation cz-gemini" style="top: 16%; left: -55px; width: 230px; --z-o: 0.34; --z-o2: 0.50; animation-duration: 27s; animation-delay: -9s;">
+      <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M30 24 L28 40 L33 56 L30 74 M58 22 L60 38 L55 54 L58 72 M30 74 L58 72 M33 56 L55 54 M28 40 L60 38" stroke="rgba(231, 231, 235, 0.45)" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round" />
+        <circle cx="30" cy="24" r="1.8" fill="#c4b5fd" class="cz-glow-violet" />
+        <circle cx="58" cy="22" r="1.9" fill="#bfdbfe" class="cz-glow-blue" />
+        <circle cx="28" cy="40" r="0.9" fill="#e4e4e7" />
+        <circle cx="33" cy="56" r="0.8" fill="#d4d4d8" />
+        <circle cx="30" cy="74" r="0.9" fill="#e4e4e7" />
+        <circle cx="60" cy="38" r="0.9" fill="#e4e4e7" />
+        <circle cx="55" cy="54" r="0.8" fill="#d4d4d8" />
+        <circle cx="58" cy="72" r="0.9" fill="#e4e4e7" />
+      </svg>
+    </div>
+
+    <div class="constellation cz-cancer" style="top: 21%; right: -50px; width: 170px; --z-o: 0.30; --z-o2: 0.45; animation-duration: 30s; animation-delay: -2s;">
+      <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M50 24 L42 40 L34 60 M50 24 L58 38 L66 56 M42 40 L58 38" stroke="rgba(231, 231, 235, 0.45)" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round" />
+        <circle cx="50" cy="24" r="1.5" fill="#bfdbfe" class="cz-glow-blue" />
+        <circle cx="42" cy="40" r="1" fill="#e4e4e7" />
+        <circle cx="34" cy="60" r="0.8" fill="#d4d4d8" />
+        <circle cx="58" cy="38" r="0.9" fill="#e4e4e7" />
+        <circle cx="66" cy="56" r="0.8" fill="#e4e4e7" />
+        <circle cx="48" cy="30" r="0.5" fill="#e4e4e7" opacity="0.8" />
+        <circle cx="52" cy="34" r="0.5" fill="#e4e4e7" opacity="0.8" />
+        <circle cx="44" cy="35" r="0.5" fill="#e4e4e7" opacity="0.8" />
+      </svg>
+    </div>
+
+    <div class="constellation cz-libra" style="top: 44%; left: 6%; width: 200px; --z-o: 0.36; --z-o2: 0.54; animation-duration: 25s; animation-delay: -11s;">
+      <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M30 38 L50 28 L72 44 L42 62 L30 38 M50 28 L42 62 M30 38 L72 44" stroke="rgba(231, 231, 235, 0.45)" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round" />
+        <circle cx="50" cy="28" r="1.7" fill="#bfdbfe" class="cz-glow-blue" />
+        <circle cx="30" cy="38" r="1.1" fill="#e4e4e7" />
+        <circle cx="72" cy="44" r="1" fill="#e4e4e7" />
+        <circle cx="42" cy="62" r="1.3" fill="#c4b5fd" class="cz-glow-violet" />
+        <circle cx="56" cy="34" r="0.6" fill="#e4e4e7" opacity="0.8" />
+      </svg>
+    </div>
+
+    <div class="constellation cz-scorpio" style="top: 46%; right: 6%; width: 210px; --z-o: 0.46; --z-o2: 0.64; animation-duration: 23s; animation-delay: -5s;">
+      <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M72 20 L58 28 L50 42 L44 52 L38 62 L28 74 L34 82 L44 86" stroke="rgba(231, 231, 235, 0.45)" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round" />
+        <circle cx="72" cy="20" r="1.1" fill="#e4e4e7" />
+        <circle cx="58" cy="28" r="1" fill="#e4e4e7" />
+        <circle cx="50" cy="42" r="0.9" fill="#d4d4d8" />
+        <circle cx="44" cy="52" r="2.1" fill="#c4b5fd" class="cz-glow-violet" />
+        <circle cx="38" cy="62" r="0.9" fill="#e4e4e7" />
+        <circle cx="28" cy="74" r="0.8" fill="#d4d4d8" />
+        <circle cx="34" cy="82" r="0.7" fill="#e4e4e7" />
+        <circle cx="44" cy="86" r="0.8" fill="#e4e4e7" />
+      </svg>
+    </div>
+
+    <div class="constellation cz-sagittarius" style="top: 13%; right: 16%; width: 230px; --z-o: 0.33; --z-o2: 0.48; animation-duration: 28s; animation-delay: -14s;">
+      <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M30 44 L46 34 L64 42 L70 54 L58 70 L40 64 L32 54 L30 44 M20 40 L30 44 M70 54 L78 50" stroke="rgba(231, 231, 235, 0.45)" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round" />
+        <circle cx="20" cy="40" r="0.9" fill="#e4e4e7" />
+        <circle cx="46" cy="34" r="1.1" fill="#e4e4e7" />
+        <circle cx="64" cy="42" r="1.2" fill="#bfdbfe" class="cz-glow-blue" />
+        <circle cx="70" cy="54" r="0.9" fill="#e4e4e7" />
+        <circle cx="58" cy="70" r="1" fill="#e4e4e7" />
+        <circle cx="40" cy="64" r="1" fill="#e4e4e7" />
+        <circle cx="32" cy="54" r="0.8" fill="#d4d4d8" />
+        <circle cx="30" cy="44" r="0.8" fill="#e4e4e7" />
+        <circle cx="78" cy="50" r="0.9" fill="#e4e4e7" />
+        <circle cx="52" cy="52" r="0.6" fill="#e4e4e7" opacity="0.8" />
+      </svg>
+    </div>
+
+    <div class="constellation cz-aquarius" style="top: 27%; left: 12%; width: 190px; --z-o: 0.30; --z-o2: 0.45; animation-duration: 29s; animation-delay: -8s;">
+      <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M26 56 L38 48 L50 56 L62 46 L74 54 M50 56 L56 72 L50 84 M56 72 L66 80" stroke="rgba(231, 231, 235, 0.45)" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round" />
+        <circle cx="26" cy="56" r="0.9" fill="#e4e4e7" />
+        <circle cx="38" cy="48" r="1.5" fill="#bfdbfe" class="cz-glow-blue" />
+        <circle cx="50" cy="56" r="1" fill="#e4e4e7" />
+        <circle cx="62" cy="46" r="0.9" fill="#e4e4e7" />
+        <circle cx="74" cy="54" r="0.8" fill="#d4d4d8" />
+        <circle cx="56" cy="72" r="1" fill="#e4e4e7" />
+        <circle cx="50" cy="84" r="0.8" fill="#e4e4e7" />
+        <circle cx="66" cy="80" r="0.8" fill="#e4e4e7" />
+        <circle cx="46" cy="30" r="0.6" fill="#c4b5fd" opacity="0.6" />
+      </svg>
+    </div>
+
+    <div class="constellation cz-pisces" style="top: 31%; right: 9%; width: 200px; --z-o: 0.33; --z-o2: 0.48; animation-duration: 26s; animation-delay: -17s;">
+      <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M28 30 L16 48 L30 58 L42 46 L28 30 M70 24 L60 42 L74 52 L84 40 L70 24 M42 46 L60 42" stroke="rgba(231, 231, 235, 0.45)" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round" />
+        <circle cx="42" cy="46" r="1.2" fill="#c4b5fd" class="cz-glow-violet" />
+        <circle cx="60" cy="42" r="1.2" fill="#bfdbfe" class="cz-glow-blue" />
+        <circle cx="16" cy="48" r="0.9" fill="#e4e4e7" />
+        <circle cx="30" cy="58" r="0.8" fill="#d4d4d8" />
+        <circle cx="70" cy="24" r="0.9" fill="#e4e4e7" />
+        <circle cx="84" cy="40" r="0.8" fill="#e4e4e7" />
+        <circle cx="51" cy="44" r="0.5" fill="#e4e4e7" opacity="0.8" />
+      </svg>
+    </div>
+
+    <div class="constellation cz-capricorn" style="top: 58%; left: 2%; width: 190px; --z-o: 0.28; --z-o2: 0.42; animation-duration: 31s; animation-delay: -20s;">
+      <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M30 26 L48 38 L44 52 L58 64 L74 58 M58 64 L52 78 L66 86" stroke="rgba(231, 231, 235, 0.45)" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round" />
+        <circle cx="30" cy="26" r="1.4" fill="#c4b5fd" class="cz-glow-violet" />
+        <circle cx="48" cy="38" r="0.9" fill="#e4e4e7" />
+        <circle cx="44" cy="52" r="0.8" fill="#d4d4d8" />
+        <circle cx="58" cy="64" r="1" fill="#e4e4e7" />
+        <circle cx="74" cy="58" r="0.9" fill="#e4e4e7" />
+        <circle cx="52" cy="78" r="0.7" fill="#e4e4e7" />
+        <circle cx="66" cy="86" r="0.8" fill="#e4e4e7" />
+      </svg>
+    </div>
+
+    <div class="constellation cz-leo" style="bottom: 5%; left: -70px; width: 240px; --z-o: 0.44; --z-o2: 0.62; animation-duration: 25s; animation-delay: -12s;">
+      <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M40 60 L34 48 L38 36 L48 28 L60 30 L66 40 M40 60 L52 70 L64 78 M66 40 L52 70" stroke="rgba(231, 231, 235, 0.45)" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round" />
+        <circle cx="40" cy="60" r="2" fill="#c4b5fd" class="cz-glow-violet" />
+        <circle cx="34" cy="48" r="0.9" fill="#e4e4e7" />
+        <circle cx="38" cy="36" r="0.8" fill="#d4d4d8" />
+        <circle cx="48" cy="28" r="1" fill="#e4e4e7" />
+        <circle cx="60" cy="30" r="0.9" fill="#e4e4e7" />
+        <circle cx="66" cy="40" r="1" fill="#e4e4e7" />
+        <circle cx="52" cy="70" r="0.9" fill="#e4e4e7" />
+        <circle cx="64" cy="78" r="1.4" fill="#bfdbfe" class="cz-glow-blue" />
+      </svg>
+    </div>
+
+    <div class="constellation cz-virgo" style="bottom: 9%; right: -90px; width: 260px; --z-o: 0.36; --z-o2: 0.54; animation-duration: 27s; animation-delay: -1s;">
+      <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M28 66 L42 48 L52 34 L42 20 M52 34 L68 26" stroke="rgba(231, 231, 235, 0.45)" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round" />
+        <circle cx="28" cy="66" r="2" fill="#c4b5fd" class="cz-glow-violet" />
+        <circle cx="42" cy="48" r="1" fill="#e4e4e7" />
+        <circle cx="52" cy="34" r="1.1" fill="#e4e4e7" />
+        <circle cx="42" cy="20" r="0.9" fill="#e4e4e7" />
+        <circle cx="68" cy="26" r="1" fill="#e4e4e7" />
+        <circle cx="58" cy="44" r="0.6" fill="#e4e4e7" opacity="0.8" />
+      </svg>
+    </div>
+
+    <div class="lone-star" style="top: 8%; left: 26%; width: 26px; --z-o: 0.58; --z-o2: 0.84; animation-duration: 33s; animation-delay: -4s;">
+      <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="7" fill="#e4e4e7" /></svg>
+    </div>
+    <div class="lone-star" style="top: 18%; right: 34%; width: 22px; --z-o: 0.52; --z-o2: 0.78; animation-duration: 36s; animation-delay: -15s;">
+      <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="7" fill="#c4b5fd" opacity="0.8" /></svg>
+    </div>
+    <div class="lone-star" style="top: 52%; left: 20%; width: 28px; --z-o: 0.62; --z-o2: 0.88; animation-duration: 31s; animation-delay: -9s;">
+      <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="7" fill="#e4e4e7" /></svg>
+    </div>
+    <div class="lone-star" style="top: 62%; right: 24%; width: 24px; --z-o: 0.52; --z-o2: 0.78; animation-duration: 35s; animation-delay: -22s;">
+      <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="7" fill="#bfdbfe" opacity="0.8" /></svg>
+    </div>
+    <div class="lone-star" style="bottom: 12%; left: 36%; width: 30px; --z-o: 0.62; --z-o2: 0.88; animation-duration: 29s; animation-delay: -18s;">
+      <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="7" fill="#e4e4e7" /></svg>
+    </div>
+    <div class="lone-star" style="bottom: 18%; right: 18%; width: 22px; --z-o: 0.52; --z-o2: 0.78; animation-duration: 34s; animation-delay: -11s;">
+      <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="7" fill="#c4b5fd" opacity="0.8" /></svg>
+    </div>
+  </div>
+
   <nav class="navbar">
     <div class="container navbar-inner">
       <a href="index.html" class="logo" aria-label="BID — inicio">
         <svg class="logo-icon" width="30" height="30" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <defs>
             <linearGradient id="bid-logo-gradient" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stopColor="#8b5cf6" />
-              <stop offset="1" stopColor="#a78bfa" />
+              <stop offset="0" stopColor="#7c3aed" />
+              <stop offset="1" stopColor="#8b5cf6" />
             </linearGradient>
           </defs>
           <rect x="8" y="8" width="16" height="16" rx="4" transform="rotate(45 16 16)" fill="url(#bid-logo-gradient)" />
@@ -29,7 +212,7 @@
       </a>
       <div class="navbar-actions">
         <a href="login.html" class="btn btn-ghost navbar-btn">Iniciar sesión</a>
-        <a href="login.html" class="btn btn-primary navbar-btn">Comenzar gratis</a>
+        <a href="login.html?demo=1" class="btn btn-primary navbar-btn">Comenzar gratis</a>
       </div>
     </div>
   </nav>
@@ -164,6 +347,7 @@
     </div>
   </footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/animejs@4.5.0/dist/bundles/anime.umd.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

@@ -605,6 +605,103 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
+/* ---------- Zodiac background (constelaciones decorativas) ---------- */
+
+.zodiac-background {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+main,
+.footer {
+  isolation: isolate;
+}
+
+.constellation,
+.lone-star {
+  position: absolute;
+  pointer-events: none;
+  opacity: var(--z-o, 0.12);
+  animation: zodiac-breathe 24s ease-in-out infinite;
+}
+
+.constellation svg,
+.lone-star svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.cz-glow-violet {
+  filter: drop-shadow(0 0 3px rgba(139, 92, 246, 0.9));
+}
+
+.cz-glow-blue {
+  filter: drop-shadow(0 0 3px rgba(147, 197, 253, 0.8));
+}
+
+/* Líneas de las constelaciones: ligeramente más visibles para que la forma
+   se lea, pero SIN animación propia (no parpadean; solo respiran con el
+   contenedor a 24-36s, que es estable). */
+.zodiac-background svg path {
+  stroke: rgba(232, 235, 242, 0.68);
+}
+
+@keyframes zodiac-breathe {
+  0%, 100% {
+    opacity: var(--z-o, 0.12);
+  }
+  50% {
+    opacity: var(--z-o2, 0.18);
+  }
+}
+
+/* Las estrellas titilan con Anime.js (app.js), que escribe opacity/transform
+   inline por estrella con parámetros pseudoaleatorios generados al iniciar.
+   El scale se centra en cada círculo para un crecimiento simétrico y sutil.
+   Las líneas (<path>) NO titilan: solo respiran con el contenedor (24-36s),
+   es decir, permanecen prácticamente estáticas. */
+.zodiac-background svg circle {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* FALLBACK (solo si Anime.js no está disponible): titileo CSS por estrella.
+   app.js añade estas clases y --tw-* solo cuando window.anime no existe o
+   animate() falla; cuando Anime.js funciona no se aplican (evita conflictos). */
+
+@keyframes star-twinkle-soft {
+  0%, 100% {
+    opacity: var(--tw-base, 0.6);
+  }
+  50% {
+    opacity: var(--tw-peak, 0.95);
+  }
+}
+
+@keyframes star-twinkle-flash {
+  0%, 55%, 100% {
+    opacity: var(--tw-base, 0.6);
+  }
+  70% {
+    opacity: var(--tw-peak, 1);
+  }
+  84% {
+    opacity: var(--tw-base, 0.6);
+  }
+}
+
+.cz-twinkle-soft {
+  animation: star-twinkle-soft var(--tw-duration, 4s) ease-in-out var(--tw-delay, -1s) infinite backwards;
+}
+
+.cz-twinkle-flash {
+  animation: star-twinkle-flash var(--tw-duration, 4.5s) ease-in-out var(--tw-delay, -1s) infinite backwards;
+}
+
 /* ---------- Responsive ---------- */
 
 @media (max-width: 768px) {
@@ -622,6 +719,16 @@ h1, h2, h3, h4, h5, h6 {
 
   .benefits-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Móvil: menos constelaciones para no saturar el fondo */
+  .zodiac-background .cz-gemini,
+  .zodiac-background .cz-cancer,
+  .zodiac-background .cz-aquarius,
+  .zodiac-background .cz-pisces,
+  .zodiac-background .cz-libra,
+  .zodiac-background .cz-capricorn {
+    display: none;
   }
 }
 
@@ -642,6 +749,10 @@ h1, h2, h3, h4, h5, h6 {
 
   .benefits-grid {
     grid-template-columns: 1fr;
+  }
+
+  .zodiac-background .cz-sagittarius {
+    display: none;
   }
 
   .footer-container {
