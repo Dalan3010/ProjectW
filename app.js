@@ -66,15 +66,15 @@ document.querySelectorAll("[data-fake]").forEach((link) => {
 
   // Titileo CSS de respaldo para UNA estrella.
   const applyCssTwinkle = (star, dim) => {
-    const soft = Math.random() < 0.62;
+    const soft = Math.random() < 0.7;
     star.style.opacity = "";
     star.style.transform = "";
     star.style.filter = "";
     star.classList.add(soft ? "cz-twinkle-soft" : "cz-twinkle-flash");
-    star.style.setProperty("--tw-duration", rand(2, 6).toFixed(2) + "s");
+    star.style.setProperty("--tw-duration", rand(2.5, 6).toFixed(2) + "s");
     star.style.setProperty("--tw-delay", rand(-6, 6).toFixed(2) + "s");
-    star.style.setProperty("--tw-base", (rand(0.6, 0.85) * dim).toFixed(2));
-    star.style.setProperty("--tw-peak", (rand(0.95, 1) * dim).toFixed(2));
+    star.style.setProperty("--tw-base", (rand(0.35, 0.55) * dim).toFixed(2));
+    star.style.setProperty("--tw-peak", ((soft ? rand(0.6, 0.8) : rand(0.9, 1)) * dim).toFixed(2));
   };
 
   const { animate } = window.anime || {};
@@ -88,62 +88,103 @@ document.querySelectorAll("[data-fake]").forEach((link) => {
       return;
     }
 
-    // Personalidad: comportamiento, rango de opacidad, duración, escala y delay.
-    const roll = Math.random();
+    // Personalidad por JERARQUÍA VISUAL, según el radio r del SVG:
+    //   r >= 3    → acentos (lone stars): destellos fuertes ocasionales.
+    //   1.4-<3    → estrellas destacadas: destello ocasional o brillo vivo.
+    //   0.9-<1.4  → normales (base 0.35-0.55, secundarias hasta 0.6-0.8).
+    //   < 0.9     → pequeñas casi estáticas: variación mínima.
     let floor;
-    let spread;
-    let duration;
+    let ceiling;
+    let cycle;
     let scaleTo;
+    let flash = false;
+    const r = parseFloat(star.getAttribute("r")) || 1;
 
-    if (roll < 0.5) {
-      // Titileo suave y continuo, como un parpadeo tranquilo.
-      floor = rand(0.55, 0.8) * dim;
-      spread = rand(0.3, 0.45) * dim;
-      duration = rand(2400, 5200);
-      scaleTo = rand(1.02, 1.08);
-    } else if (roll < 0.85) {
-      // Destello más perceptible tras un periodo casi quieto.
-      floor = rand(0.5, 0.74) * dim;
-      spread = rand(0.4, 0.6) * dim;
-      duration = rand(3600, 6000);
-      scaleTo = rand(1.05, 1.14);
+    if (r >= 3) {
+      // Acentos: destello fuerte ocasional (hasta 0.9-1.0) tras un reposo.
+      flash = Math.random() < 0.7;
+      floor = rand(0.35, 0.5);
+      ceiling = flash ? rand(0.92, 1) : rand(0.7, 0.82);
+      cycle = flash ? rand(5000, 6800) : rand(3400, 5200);
+      scaleTo = flash ? rand(1.05, 1.14) : rand(1.01, 1.06);
+    } else if (r >= 1.4) {
+      flash = Math.random() < 0.5;
+      floor = rand(0.35, 0.5);
+      ceiling = flash ? rand(0.9, 1) : rand(0.68, 0.8);
+      cycle = flash ? rand(4600, 6200) : rand(3000, 4800);
+      scaleTo = flash ? rand(1.04, 1.12) : rand(1.01, 1.05);
+    } else if (r >= 0.9) {
+      // Normales: base 0.35-0.55; ~25% "secundarias" suben a 0.6-0.8.
+      flash = Math.random() < 0.25;
+      floor = rand(0.35, 0.55);
+      ceiling = flash ? rand(0.7, 0.8) : rand(0.5, 0.68);
+      cycle = flash ? rand(4200, 5800) : rand(2800, 5000);
+      scaleTo = flash ? rand(1.03, 1.08) : rand(1.005, 1.04);
     } else {
-      // Casi constante durante varios segundos: apenas cambia de intensidad.
-      floor = rand(0.58, 0.75) * dim;
-      spread = rand(0.1, 0.22) * dim;
-      duration = rand(4800, 6000);
-      scaleTo = rand(1.01, 1.04);
+      // Pequeñas casi estáticas: apenas cambian, se mantienen tenues.
+      floor = rand(0.3, 0.45);
+      ceiling = rand(0.36, 0.55);
+      cycle = rand(5000, 6500);
+      scaleTo = rand(1.002, 1.025);
     }
 
-    const ceiling = Math.min(1, floor + spread);
+    const delay = rand(0, 6000);
     // Anime.js v4 exige delay >= 0; el desfase se consigue inicializando cada
     // estrella en su propio estado y escalonando el arranque (0-6s).
-    const delay = rand(0, 6000);
-
-    // Estado inicial propio de la estrella: evita sincronización al cargar.
     star.style.opacity = String(floor);
 
-    // Glow: intensidad propia por estrella, estática (barata) y solo en las
-    // estrellas destacadas; el pulso visual nace de la opacidad animada.
+    // Glow: intensidad aleatoria propia por estrella (estática y barata, solo
+    // en las destacadas). El destello de opacidad compone el drop-shadow: el
+    // glow se percibe más intenso en el pico sin animar `filter`.
     if (star.classList.contains("cz-glow-violet")) {
-      star.style.filter = `drop-shadow(0 0 ${rand(2.5, 6).toFixed(2)}px rgba(139, 92, 246, ${rand(0.35, 0.9).toFixed(2)}))`;
+      star.style.filter = `drop-shadow(0 0 ${rand(3, 7).toFixed(2)}px rgba(139, 92, 246, ${rand(0.45, 0.95).toFixed(2)}))`;
     } else if (star.classList.contains("cz-glow-blue")) {
-      star.style.filter = `drop-shadow(0 0 ${rand(2.5, 5.5).toFixed(2)}px rgba(147, 197, 253, ${rand(0.3, 0.85).toFixed(2)}))`;
+      star.style.filter = `drop-shadow(0 0 ${rand(2.5, 6.5).toFixed(2)}px rgba(147, 197, 253, ${rand(0.4, 0.9).toFixed(2)}))`;
     }
 
-    // Ciclo continuo e independiente por estrella: alternate + loop con su
-    // propia duración y delay. ease "inOutQuad" verificado en el bundle v4.
     try {
-      animate(star, {
-        opacity: { from: floor, to: ceiling, ease: "inOutQuad" },
-        scale: { from: 1, to: scaleTo, ease: "inOutQuad" },
-        duration,
-        delay,
-        alternate: true,
-        loop: true
-      });
+      if (flash) {
+        // Destello corto y perceptible con transición suave: keyframes
+        // asimétricos — reposo (55%), subida rápida (15%), pico breve (8%),
+        // caída suave (22%). Solo unas pocas estrellas siguen este ciclo.
+        const hold = cycle * 0.55;
+        const rise = cycle * 0.15;
+        const peak = cycle * 0.08;
+        const fall = cycle * 0.22;
+        // Tween 1: opacidad con destello (no alterna: tras la caída se queda
+        // en reposo hasta el siguiente ciclo).
+        animate(star, {
+          opacity: [
+            { to: floor, duration: hold },
+            { to: ceiling, duration: rise, ease: "inOutQuad" },
+            { to: ceiling, duration: peak },
+            { to: floor, duration: fall, ease: "inOutQuad" }
+          ],
+          duration: cycle,
+          delay,
+          loop: true
+        });
+        // Tween 2: escala independiente y suave (alterna: sin saltos).
+        animate(star, {
+          scale: { from: 1, to: scaleTo, ease: "inOutQuad" },
+          duration: cycle,
+          delay,
+          alternate: true,
+          loop: true
+        });
+      } else {
+        // Titileo suave continuo, totalmente asíncrono por estrella.
+        animate(star, {
+          opacity: { from: floor, to: ceiling, ease: "inOutQuad" },
+          scale: { from: 1, to: scaleTo, ease: "inOutQuad" },
+          duration: cycle,
+          delay,
+          alternate: true,
+          loop: true
+        });
+      }
     } catch (err) {
-      // Adobe/edge: si anime falla con esta estrella, respaldo CSS en ella.
+      // Si anime falla con esta estrella, respaldo CSS en ella.
       applyCssTwinkle(star, dim);
     }
   });

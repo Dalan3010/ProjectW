@@ -643,12 +643,13 @@ main,
   filter: drop-shadow(0 0 3px rgba(147, 197, 253, 0.8));
 }
 
-/* Líneas de las constelaciones: ligeramente más visibles para que la forma
-   se lea, pero SIN animación propia (no parpadean; solo respiran con el
-   contenedor a 24-36s, que es estable). */
-.zodiac-background svg path {
-  stroke: rgba(232, 235, 242, 0.68);
-}
+/* Líneas: MUY sutiles (jerarquía: líneas << estrellas). Al subir el contenedor
+     a 0.55-0.84, un stroke bajo (~0.22) deja un efectivo de ~0.12-0.20. No
+     parpadean; solo respiran con el contenedor. Glow morado muy discreto. */
+  .zodiac-background svg path {
+    stroke: rgba(228, 231, 240, 0.22);
+    filter: drop-shadow(0 0 1.5px rgba(139, 92, 246, 0.3));
+  }
 
 @keyframes zodiac-breathe {
   0%, 100% {
