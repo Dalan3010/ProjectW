@@ -63,6 +63,19 @@ export class ChatService {
     return true;
   }
 
+  // Borrado múltiple en una sola escritura: devuelve cuántos chats se eliminaron.
+  removeMany(userEmail, chatIds) {
+    const ids = new Set(chatIds);
+    const all = this.allChats();
+    const userChats = all[userEmail] || [];
+    const rest = userChats.filter((c) => !ids.has(c.id));
+    const removed = userChats.length - rest.length;
+    if (removed === 0) return 0;
+    all[userEmail] = rest;
+    this.storage.set(CHATS_KEY, all);
+    return removed;
+  }
+
   addMessage(userEmail, chatId, { role, content }) {
     const all = this.allChats();
     const userChats = (all[userEmail] || []).slice();
