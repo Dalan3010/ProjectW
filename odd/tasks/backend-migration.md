@@ -28,14 +28,14 @@ FronHack already integrates the real backend; ProjectW (the vanilla rewrite) sti
 - Delegation attempted once (explore agent for mapping); runtime returned "OpenCode free tier can only be used from within OpenCode" — subagents unavailable in this session. All tasks run **direct inline** from here.
 
 ## Tasks
-- [ ] T1 Add `js/api/client.js` — fetch client: base URL, JSON handling, Bearer token from storage, 401 → clear token + redirect `login.html`, timeout, `getApiError`. Route: inline (single mechanical file, port of `client.ts` already read).
-- [ ] T2 Add `js/api/auth.js`, `js/api/cases.js`, `js/api/chat.js` — endpoint wrappers mirroring FronHack's API surface (`authApi`, `casesApi`, `chatApi`). Route: inline.
-- [ ] T3 Rewire `js/auth.js` AuthService to real `/auth/*` endpoints; session stores `{ name, email, accessToken, loginAt }`. **Product decision pending** (see below) about demo mode.
-- [ ] T4 Wire `js/pages/casos.js` to `casesApi.list()` instead of `chats.list()`.
-- [ ] T5 Wire `js/pages/chat.js` to `chatApi.startCase/sendMessage/getMessages`, replacing the scripted assistant responses with backend replies.
+- [x] T1 Add `js/api/client.js` — fetch client: base URL, JSON handling, Bearer token from storage, 401 → clear token + redirect `login.html`, timeout, `getApiError`. Commit `57a6eee`.
+- [x] T2 Add `js/api/auth.js`, `js/api/cases.js`, `js/api/chat.js` — endpoint wrappers mirroring FronHack's API surface. Commit `c1f6752`.
+- [x] T3 Rewire `js/auth.js` AuthService to real `/auth/*` endpoints; session stores `{ name, email, accessToken, loginAt }`. Demo mode and local register removed (user decision: pure backend). Commits `78f25c3` (+ login.html/login.js).
+- [x] T4 Wire `js/pages/casos.js` to `casesApi.list()` with loading/error states. Commit `bb308c9`.
+- [x] T5 Wire `js/pages/chat.js` to `chatApi.startCase/sendMessage/getMessages`; rich cards render from `message.metadata` (analysis/ideas/nextSteps/confidence). Commit `a9b41ed`. Orphaned mock `js/chats.js` removed in `acc6f89`.
 
-## Pending product decision (blocks T3–T5)
-ProjectW currently has local register/login (hashed in localStorage) and a "Entrar con cuenta demo" bypass. The real API has `/auth/register` and `/auth/login` but no demo endpoint. Decision needed: drop demo mode (pure backend auth) vs keep demo as a local-only bypass alongside real auth.
+## Pending product decision — RESOLVED
+User chose **pure backend**: demo mode and local registration removed (`78f25c3`).
 
 ## Acceptance criteria
 - `js/api/*` mirrors FronHack's endpoint contract (paths, payloads, response shapes from `src/types/index.ts`).
@@ -45,4 +45,5 @@ ProjectW currently has local register/login (hashed in localStorage) and a "Entr
 
 ## Progress / evidence
 - Branch: `backendCalled` (created from `main` at f6e81b4).
-- T1..T5: pending.
+- T1–T5: done. `node --check` passed on every new/changed file before each commit.
+- Not verified live: backend (`localhost:5678/webhook`) was down during migration; login/cases/chat need a smoke test once n8n is up.
