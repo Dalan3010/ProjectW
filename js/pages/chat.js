@@ -1,20 +1,11 @@
-// BID — Chat del asistente con persistencia real por usuario.
-// El guion (preguntas, análisis, prompt cards) vive en assistant.js; acá solo
-// queda el comportamiento: render, typing simulado y guardado en localStorage.
+// BID — Chat del asistente contra el backend real.
+// El flujo replica el useChat de FronHack: el primer mensaje crea el caso vía
+// /chat/start, los siguientes van a /chat, y ?caso=<id> carga el historial
+// desde /cases/<id>/messages. Las tarjetas ricas se arman desde message.metadata.
 
-import { chats } from '../chats.js';
+import { chatApi } from '../api/chat.js';
 import { icon } from '../icons.js';
-import {
-  ANALYSIS_SENTINEL,
-  CLARIFYING_QUESTIONS,
-  FALLBACK_RESPONSE,
-  PROMPTS,
-  ANALYSIS_CONTENT,
-  CONFIDENCE,
-  ASSESSMENT_DATA,
-  IDEAS,
-  NEXT_STEPS,
-} from '../assistant.js';
+import { PROMPTS } from '../assistant.js';
 import {
   escapeHtml,
   requireSession,
@@ -26,11 +17,8 @@ import {
 const session = requireSession();
 
 if (session) {
-  const userEmail = session.email;
-
   // ---------- Estado ----------
   let activeChatId = null;
-  let userMsgCount = 0;
   let isProcessing = false;
 
   // ---------- DOM ----------
@@ -44,8 +32,9 @@ if (session) {
   const welcomeLogo = document.getElementById('welcome-logo-placeholder');
 
   // ---------- Utilidades ----------
-  function now() {
-    return new Date().toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+  function now(iso) {
+    const date = iso ? new Date(iso) : new Date();
+    return date.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
   }
 
   function scrollToBottom() {
@@ -57,7 +46,7 @@ if (session) {
   renderUserChip(session);
   renderLogoutButton(session);
 
-  // ---------- Mini renderer markdown (datos mock controlados) ----------
+  // ---------- Mini renderer markdown ----------
   function renderMd(text) {
     const lines = text.split('\n');
     let html = '';
@@ -109,7 +98,33 @@ if (session) {
     return text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
   }
 
-  // ---------- Render de tarjetas ricas ----------
+  // ---------- Tarjetas ricas (desde metadata del backend) ----------
+  // El backend usa willingnessToPlay/mainRisks; los renderers esperan
+  // willingnessToPay/risks: adaptamos en el paso de metadata → card.
+  function assessmentFromMeta(a) {
+    return {
+      urgency: a.urgency,
+      frequency: a.frequency,
+      severity: a.severity,
+      willingnessToPay: a.willingnessToPlay,
+      targetSegment: a.targetSegment,
+      risks: a.mainRisks || [],
+      overallScore: a.overallScore,
+    };
+  }
+
+  function ideaFromMeta(i) {
+    return {
+      title: i.title,
+      desc: i.description,
+      revenue: i.revenueModel,
+      difficulty: i.entryDifficulty,
+      time: i.implementationSpeed,
+      score: i.potentialScore,
+      tags: i.tags || [],
+    };
+  }
+
   function renderAssessmentCard(data) {
     const scoreBars = [
       { label: 'Urgencia', value: data.urgency },
@@ -164,7 +179,7 @@ if (session) {
           <span class="chip chip-outline">Tiempo: ${timeLabels[idea.time]}</span>
           <span class="chip chip-accent">Score: ${idea.score}</span>
         </div>
-        <div class="idea-tags">${idea.tags.map(t => `<span>#${t}</span>`).join(' ')}</div>
+        <div class="idea-tags">${idea.tags.map(t => `<span>#${escapeHtml(t)}</span>`).join(' ')}</div>
       </div>`;
   }
 
@@ -182,39 +197,47 @@ if (session) {
       </div>`;
   }
 
-  function renderAnalysis() {
-    let html = renderMd(ANALYSIS_CONTENT);
-    html += renderAssessmentCard(ASSESSMENT_DATA);
-    html += '<p class="ideas-label">Ideas de negocio propuestas</p>';
-    IDEAS.forEach((idea, i) => { html += renderIdeaCard(idea, i, i === 0); });
-    html += renderNextSteps(NEXT_STEPS);
-    html += `<div class="conf-foot">${icon('verified', 14)} Confianza del análisis: <strong>${CONFIDENCE}%</strong></div>`;
+  // Si el mensaje trae metadata de análisis, sumamos las tarjetas ricas al HTML.
+  function renderAssistantContent(message) {
+    let html = renderMd(message.content || '');
+    const meta = message.metadata;
+
+    if (meta && meta.type === 'analysis') {
+      if (meta.analysis) html += renderAssessmentCard(assessmentFromMeta(meta.analysis));
+      if (meta.ideas && meta.ideas.length) {
+        html += '<p class="ideas-label">Ideas de negocio propuestas</p>';
+        meta.ideas.forEach((idea, i) => { html += renderIdeaCard(ideaFromMeta(idea), i, i === 0); });
+      }
+      if (meta.nextSteps && meta.nextSteps.length) html += renderNextSteps(meta.nextSteps);
+      if (meta.confidence !== undefined) {
+        html += `<div class="conf-foot">${icon('verified', 14)} Confianza del análisis: <strong>${meta.confidence}%</strong></div>`;
+      }
+    }
+
     return html;
   }
 
   // ---------- Burbujas ----------
-  function msgTime() { return now(); }
-
-  function addUserMessage(text) {
+  function addUserMessage(text, iso) {
     const row = document.createElement('div');
     row.className = 'msg-row user msg-appear';
     row.innerHTML = `
       <div class="msg-body">
         <div class="msg-bubble"><p class="md-line">${escapeHtml(text)}</p></div>
-        <div class="msg-time">${msgTime()}</div>
+        <div class="msg-time">${now(iso)}</div>
       </div>`;
     threadEl.appendChild(row);
     scrollToBottom();
   }
 
-  function addBotMessage(html) {
+  function addBotMessage(html, iso) {
     const row = document.createElement('div');
     row.className = 'msg-row bot msg-appear';
     row.innerHTML = `
       <div class="bot-avatar">${icon('smart_toy', 18)}</div>
       <div class="msg-body">
         <div class="msg-bubble">${html}</div>
-        <div class="msg-time">${msgTime()}</div>
+        <div class="msg-time">${now(iso)}</div>
       </div>`;
     threadEl.appendChild(row);
     scrollToBottom();
@@ -242,89 +265,65 @@ if (session) {
     if (el) el.remove();
   }
 
-  // ---------- Persistencia ----------
-  function persistMessage(role, content) {
-    if (!activeChatId) return null;
-    return chats.addMessage(userEmail, activeChatId, { role, content });
+  function showError(text) {
+    const row = document.createElement('div');
+    row.className = 'msg-row bot msg-appear';
+    row.innerHTML = `
+      <div class="bot-avatar">${icon('smart_toy', 18)}</div>
+      <div class="msg-body">
+        <div class="msg-bubble"><p class="md-line">${escapeHtml(text)}</p></div>
+      </div>`;
+    threadEl.appendChild(row);
+    scrollToBottom();
   }
 
-  // Al reabrir, el sentinel del análisis se regenera como HTML completo.
-  function renderStoredMessage(message) {
+  // ---------- Mensajes del backend → burbujas ----------
+  function renderMessage(message) {
     if (message.role === 'user') {
-      addUserMessage(message.content);
-    } else if (message.content === ANALYSIS_SENTINEL) {
-      addBotMessage(renderAnalysis());
+      addUserMessage(message.content, message.timestamp);
     } else {
-      addBotMessage(renderMd(message.content));
+      addBotMessage(renderAssistantContent(message), message.timestamp);
     }
   }
 
-  function loadChat(chatId) {
-    const chat = chats.get(userEmail, chatId);
-    if (!chat) return null;
-    activeChatId = chatId;
-    welcomeEl.classList.add('hidden');
-    threadEl.textContent = '';
-    chat.messages.forEach(renderStoredMessage);
-    // El contador se reconstruye del historial real, no de una suposición.
-    userMsgCount = chat.messages.filter((m) => m.role === 'user').length;
-    return chat;
-  }
-
-  // ---------- Lógica de respuestas ----------
-  function getBotResponse(text) {
-    const lower = text.toLowerCase();
-
-    // Saludo antes del 4to mensaje
-    if (userMsgCount < 4 && /\b(hola|buenas|hi|hey|hola!\b)/i.test(lower)) {
-      return '¡Hola! Soy **BID**, tu asistente de validación de ideas de negocio. 🚀\n\n¿Qué problema o idea quieres explorar hoy? Cuéntame con el mayor detalle posible.';
+  async function loadCase(caseId) {
+    try {
+      const messages = await chatApi.getMessages(caseId);
+      activeChatId = caseId;
+      welcomeEl.classList.add('hidden');
+      threadEl.textContent = '';
+      (messages || []).forEach(renderMessage);
+    } catch (error) {
+      showError(`No se pudo cargar el caso: ${error.message}`);
     }
-
-    if (userMsgCount === 1) return CLARIFYING_QUESTIONS[0];
-    if (userMsgCount === 2) return CLARIFYING_QUESTIONS[1];
-    if (userMsgCount === 3) return CLARIFYING_QUESTIONS[2];
-
-    // 4to mensaje → análisis completo
-    if (userMsgCount === 4) return ANALYSIS_SENTINEL;
-
-    return FALLBACK_RESPONSE;
   }
 
-  function processMessage(text) {
+  // ---------- Envío ----------
+  async function processMessage(text) {
     if (isProcessing) return;
     isProcessing = true;
     updateSendBtn();
 
-    // El chat nace recién con el primer mensaje: evita conversaciones huérfanas.
-    if (!activeChatId) {
-      activeChatId = chats.create(userEmail).id;
-    }
-
     addUserMessage(text);
-    userMsgCount++;
-    persistMessage('user', text);
-
-    const response = getBotResponse(text);
-
-    // Simular typing
-    const delay = 800 + Math.random() * 1200;
     showTyping();
 
-    setTimeout(() => {
-      removeTyping();
-
-      if (response === ANALYSIS_SENTINEL) {
-        addBotMessage(renderAnalysis());
+    try {
+      let response;
+      if (!activeChatId) {
+        response = await chatApi.startCase(text);
+        activeChatId = response.caseId;
       } else {
-        addBotMessage(renderMd(response));
+        response = await chatApi.sendMessage({ caseId: activeChatId, content: text });
       }
-
-      // El sentinel se guarda tal cual; al reabrir se regenera el HTML.
-      persistMessage('assistant', response);
-
+      removeTyping();
+      renderMessage(response.message);
+    } catch (error) {
+      removeTyping();
+      showError(`No se pudo enviar el mensaje: ${error.message}`);
+    } finally {
       isProcessing = false;
       updateSendBtn();
-    }, delay);
+    }
   }
 
   // ---------- Input ----------
@@ -407,19 +406,12 @@ if (session) {
   // Render prompt cards
   renderPrompts();
 
-  // Restaurar conversación desde ?caso=ID
+  // Restaurar conversación desde ?caso=ID (historial real del backend)
   const params = new URLSearchParams(window.location.search);
   const casoId = params.get('caso');
-
   if (casoId) {
-    const chat = loadChat(casoId);
-    if (chat && chat.messages.length === 0) {
-      // Caso recién creado sin mensajes: abrimos con un saludo que queda persistido.
-      const greeting = '¡Hola! Empezamos un nuevo **caso**. Contame tu idea o el problema que querés resolver y voy a hacerte algunas preguntas para analizar la oportunidad.';
-      addBotMessage(renderMd(greeting));
-      persistMessage('assistant', greeting);
-      userMsgCount = 0;
-    }
+    welcomeEl.classList.add('hidden');
+    loadCase(casoId);
   }
 
   // Eventos textarea
