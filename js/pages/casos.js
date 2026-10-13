@@ -1,7 +1,7 @@
-// BID — Grilla de casos: los chats del usuario como tarjetas, con búsqueda en vivo.
+// BID — Grilla de casos: lista desde el backend real, con búsqueda en vivo.
 // Cada tarjeta enlaza a chat.html?caso=<id> para retomar la conversación.
 
-import { chats } from '../chats.js';
+import { casesApi } from '../api/cases.js';
 import { icon } from '../icons.js';
 import {
   escapeHtml,
@@ -15,28 +15,26 @@ import {
 const session = requireSession();
 
 if (session) {
-  const userEmail = session.email;
   const summaryLength = 150;
+  const EMPTY_SUMMARY = 'Todavía no hay mensajes. Abrí este caso para empezar la conversación.';
 
   const grid = document.getElementById('casos-grid');
   const countEl = document.getElementById('casos-count');
   const searchInput = document.getElementById('search-input');
 
-  // Resumen: primer mensaje del usuario, con corte limpio a 150 caracteres.
-  function summaryFor(chat) {
-    const first = (chat.messages || []).find((m) => m.role === 'user');
-    if (!first) return 'Todavía no hay mensajes. Abrí este caso para empezar la conversación.';
-    const text = first.content.trim();
-    return text.length > summaryLength ? `${text.slice(0, summaryLength)}…` : text;
-  }
+  let allCases = [];
 
-  function chatToCase(chat) {
+  // El caso del backend ya viene con title/summary/messageCount/updatedAt.
+  function normalizeCase(item) {
+    let summary = (item.summary || '').trim();
+    if (!summary) summary = EMPTY_SUMMARY;
+    else if (summary.length > summaryLength) summary = `${summary.slice(0, summaryLength)}…`;
     return {
-      id: chat.id,
-      title: chat.title || 'Nueva conversación',
-      summary: summaryFor(chat),
-      messageCount: (chat.messages || []).length,
-      updatedAt: chat.updatedAt,
+      id: item.id,
+      title: item.title || 'Nueva conversación',
+      summary,
+      messageCount: item.messageCount || 0,
+      updatedAt: item.updatedAt,
     };
   }
 
@@ -76,10 +74,19 @@ if (session) {
     countEl.textContent = '0 casos · Ordenados por actividad reciente';
   }
 
-  function filterCases(all, query) {
-    if (!query) return all;
+  function renderError(message) {
+    grid.innerHTML = `
+      <div class="empty-state">
+        <p><strong>No se pudieron cargar los casos</strong></p>
+        <p>${escapeHtml(message)}</p>
+      </div>`;
+    countEl.textContent = '0 casos';
+  }
+
+  function filterCases(cases, query) {
+    if (!query) return cases;
     const q = query.toLowerCase();
-    return all.filter(
+    return cases.filter(
       (c) => c.title.toLowerCase().includes(q) || c.summary.toLowerCase().includes(q)
     );
   }
@@ -91,13 +98,19 @@ if (session) {
   document.getElementById('search-icon-placeholder').innerHTML = icon('search', 18);
   document.getElementById('search-tune-btn').innerHTML = icon('tune', 18);
 
-  const allCases = chats.list(userEmail).map(chatToCase);
+  // Estado de carga mientras el backend responde
+  grid.innerHTML = '<div class="empty-state"><p>Cargando casos…</p></div>';
 
-  if (!allCases.length) {
-    renderEmptyState();
-  } else {
-    renderCards(allCases);
-  }
+  casesApi.list()
+    .then((response) => {
+      allCases = (response.data || []).map(normalizeCase);
+      if (!allCases.length) {
+        renderEmptyState();
+      } else {
+        renderCards(allCases);
+      }
+    })
+    .catch((error) => renderError(error.message));
 
   // Búsqueda en vivo por título y resumen
   searchInput.addEventListener('input', () => {
