@@ -36,13 +36,13 @@ Decisión del usuario (2026-10-14): *"Traer el backend al repo"* — no borrar e
   Si tarda/pide pull grande → se registra honestamente como pendiente para la parte 2.
 
 ## Tasks
-- [ ] T1 Crear rama `feat/jak-backend` y este documento.
-- [ ] T2 Copiar backend fuente a `api/` (excluir `.git/`, `.atl/`, `node_modules`, `__pycache__`).
-- [ ] T3 Unificar `.gitignore` de ProjectW con las reglas Python del backend.
-- [ ] T4 Ajustar `Dockerfile` / `docker-compose.yml` si alguna ruta asume la raíz del repo.
-- [ ] T5 Checks: `compileall` + `docker compose config`.
-- [ ] T6 (opcional acotado) build + `/health` live.
-- [ ] T7 Commits convencionales por work unit + espejo en Engram.
+- [x] T1 Crear rama `feat/jak-backend` y este documento.
+- [x] T2 Copiar backend fuente a `api/` (excluidos `.git/`, `.atl/`, `__pycache__`, `.env`); `diff -r` → idéntico a la fuente. README nuevo en `api/README.md` (español).
+- [x] T3 `.gitignore` unificado: reglas Python/env/Docker/alembic agregadas, reglas frontend intactas, trailing newline.
+- [x] T4 Sin ajustes necesarios: Dockerfile/compose ya usan rutas relativas al directorio `api/`.
+- [x] T5 `python3 -m compileall -q api/app` → 0; `docker compose config -q` (cwd api/) → 0; `api/.env` gitignored.
+- [ ] T6 build + `/health` live: **bloqueado por entorno** — el daemon de Docker no está corriendo (`/var/run/docker.sock` inaccesible). Pendiente para la parte 2 con Docker levantado.
+- [x] T7 Commits convencionales por work unit + espejo en Engram. `e411d52` feat(api) (36 archivos), docs en el commit siguiente.
 
 ## Route declaration
 - Delegación: 1 writer para T2–T4 (copia multiarchivo), verificación según RDD (off → assess por tier).
@@ -50,3 +50,7 @@ Decisión del usuario (2026-10-14): *"Traer el backend al repo"* — no borrar e
 ## Progress / evidence
 - 2026-10-14: merge de `origin/main` (990a3aa selección múltiple) resuelto en `backendCalled` → `c184914`.
 - Backend origen: HackatonMacondoLab @ `1d7de84` (solo `POST /cases/`, `GET /`, `GET /health`).
+- 2026-10-14: parte 1 cerrada. `e411d52` importa `api/` (34 archivos, `diff -r` idéntico a la fuente) + `.gitignore` unificado.
+  Verificado: `compileall`=0, `docker compose config`=0, `api/.env` ignorado, frontend intacto.
+  Pendiente (parte 2): smoke live `/health` (daemon Docker caído), `js/api/client.js` → `localhost:8000`,
+  endpoints faltantes (list/auth/chat) y mapeo de contratos (`IdeaCaseResponseSchema` vs shape del frontend).
