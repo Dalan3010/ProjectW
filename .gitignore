@@ -3,3 +3,24 @@
 .env.local
 .atl/
 /documentos
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Environment
+.env
+.env.*.local
+
+# Docker
+docker-compose.override.yml
+
+# Alembic
+alembic/versions/*.py
+
+# OS
+Thumbs.db

@@ -7,7 +7,6 @@ const form = document.getElementById('login-form');
 const loginBody = document.getElementById('login-body');
 const success = document.getElementById('login-success');
 const successMessage = document.getElementById('success-message');
-const demoBtn = document.getElementById('demo-btn');
 const authError = document.getElementById('auth-error');
 const authTitle = document.getElementById('login-title');
 const authSubtitle = document.getElementById('login-subtitle');
@@ -30,10 +29,8 @@ function showAuthError(message) {
   authError.hidden = false;
 }
 
-function showSuccess(viaDemo) {
-  successMessage.textContent = viaDemo
-    ? 'Has entrado con la cuenta demo. Esta es una simulación de acceso.'
-    : 'Bienvenido de vuelta a BID. Esta es una simulación de acceso.';
+function showSuccess() {
+  successMessage.textContent = 'Bienvenido de vuelta a BID.';
   loginBody.classList.add('hidden');
   success.classList.remove('hidden');
 }
@@ -72,17 +69,10 @@ async function handleSubmit(event) {
     } else {
       await auth.login(email, password);
     }
-    showSuccess(false);
+    showSuccess();
   } catch (error) {
     showAuthError(error.message);
   }
-}
-
-function initDemo() {
-  demoBtn.addEventListener('click', () => {
-    auth.loginDemo();
-    showSuccess(true);
-  });
 }
 
 function initLogout() {
@@ -97,7 +87,7 @@ function initLogout() {
 const session = auth.currentUser();
 
 if (session) {
-  showSuccess(session.isDemo);
+  showSuccess();
 } else {
   setMode('login');
   form.addEventListener('submit', handleSubmit);
@@ -105,7 +95,6 @@ if (session) {
     event.preventDefault();
     setMode(mode === 'login' ? 'register' : 'login');
   });
-  initDemo();
 }
 
 initLogout();

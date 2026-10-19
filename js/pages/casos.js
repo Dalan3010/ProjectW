@@ -1,8 +1,8 @@
-// BID — Grilla de casos: los chats del usuario como tarjetas, con búsqueda en vivo.
+// BID — Grilla de casos: lista desde el backend real, con búsqueda en vivo.
 // Incluye modo de selección múltiple para eliminar uno o varios casos con confirmación.
 // Cada tarjeta enlaza a chat.html?caso=<id> para retomar la conversación.
 
-import { chats } from '../chats.js';
+import { casesApi } from '../api/cases.js';
 import { icon } from '../icons.js';
 import {
   escapeHtml,
@@ -16,8 +16,8 @@ import {
 const session = requireSession();
 
 if (session) {
-  const userEmail = session.email;
   const summaryLength = 150;
+  const EMPTY_SUMMARY = 'Todavía no hay mensajes. Abrí este caso para empezar la conversación.';
 
   // ---------- DOM ----------
   const grid = document.getElementById('casos-grid');
@@ -39,24 +39,20 @@ if (session) {
   // ---------- Estado ----------
   let allCases = [];
   let selectMode = false;
+  let deleting = false;
   const selected = new Set();
 
-  // ---------- Datos ----------
-  // Resumen: primer mensaje del usuario, con corte limpio a 150 caracteres.
-  function summaryFor(chat) {
-    const first = (chat.messages || []).find((m) => m.role === 'user');
-    if (!first) return 'Todavía no hay mensajes. Abrí este caso para empezar la conversación.';
-    const text = first.content.trim();
-    return text.length > summaryLength ? `${text.slice(0, summaryLength)}…` : text;
-  }
-
-  function chatToCase(chat) {
+  // El caso del backend ya viene con title/summary/messageCount/updatedAt.
+  function normalizeCase(item) {
+    let summary = (item.summary || '').trim();
+    if (!summary) summary = EMPTY_SUMMARY;
+    else if (summary.length > summaryLength) summary = `${summary.slice(0, summaryLength)}…`;
     return {
-      id: chat.id,
-      title: chat.title || 'Nueva conversación',
-      summary: summaryFor(chat),
-      messageCount: (chat.messages || []).length,
-      updatedAt: chat.updatedAt,
+      id: item.id,
+      title: item.title || 'Nueva conversación',
+      summary,
+      messageCount: item.messageCount || 0,
+      updatedAt: item.updatedAt,
     };
   }
 
@@ -106,10 +102,19 @@ if (session) {
     countEl.textContent = '0 casos · Ordenados por actividad reciente';
   }
 
+  function renderError(message) {
+    grid.innerHTML = `
+      <div class="empty-state">
+        <p><strong>No se pudieron cargar los casos</strong></p>
+        <p>${escapeHtml(message)}</p>
+      </div>`;
+    countEl.textContent = '0 casos';
+  }
+
   function updateSelectionUI() {
     const count = selected.size;
     selectionCount.textContent = count === 1 ? '1 seleccionado' : `${count} seleccionados`;
-    deleteSelectedBtn.disabled = count === 0;
+    deleteSelectedBtn.disabled = count === 0 || deleting;
 
     const visible = filterCases(allCases, searchInput.value);
     const allSelected = visible.length > 0 && visible.every((c) => selected.has(c.id));
@@ -129,6 +134,17 @@ if (session) {
     grid.classList.toggle('select-mode', selectMode);
     selectionBar.classList.toggle('hidden', !selectMode);
     updateSelectionUI();
+  }
+
+  // Trae la lista fresca del backend y vuelve a renderizar.
+  function reload() {
+    return casesApi
+      .list()
+      .then((response) => {
+        allCases = (response.data || []).map(normalizeCase);
+        render();
+      })
+      .catch((error) => renderError(error.message));
   }
 
   // ---------- Modo selección ----------
@@ -158,24 +174,37 @@ if (session) {
     const count = selected.size;
     if (!count) return;
     confirmText.textContent = count === 1
-      ? '¿Seguro que querés eliminar este chat? Esta acción no se puede deshacer.'
-      : `¿Seguro que querés eliminar estos ${count} chats? Esta acción no se puede deshacer.`;
+      ? '¿Seguro que querés eliminar este caso? Esta acción no se puede deshacer.'
+      : `¿Seguro que querés eliminar estos ${count} casos? Esta acción no se puede deshacer.`;
     overlay.classList.remove('hidden');
     confirmAccept.focus();
   }
 
   function closeConfirm() {
+    if (deleting) return;
     overlay.classList.add('hidden');
   }
 
+  // Borrado contra el backend: un DELETE por caso seleccionado.
+  // Si alguno falla, la lista recargada sigue mostrando lo que quedó en el servidor.
   function deleteSelected() {
-    if (!selected.size) return;
-    chats.removeMany(userEmail, [...selected]);
-    selected.clear();
-    closeConfirm();
-    allCases = chats.list(userEmail).map(chatToCase);
-    render();
-    if (!allCases.length) setSelectMode(false);
+    const ids = [...selected];
+    if (!ids.length || deleting) return;
+
+    deleting = true;
+    confirmAccept.disabled = true;
+    confirmAccept.textContent = 'Eliminando…';
+
+    Promise.allSettled(ids.map((id) => casesApi.archive(id))).finally(() => {
+      deleting = false;
+      confirmAccept.disabled = false;
+      confirmAccept.textContent = 'Eliminar';
+      selected.clear();
+      overlay.classList.add('hidden');
+      reload().then(() => {
+        if (!allCases.length) setSelectMode(false);
+      });
+    });
   }
 
   // ---------- Init ----------
@@ -186,8 +215,9 @@ if (session) {
   document.getElementById('search-tune-btn').innerHTML = icon('tune', 18);
   confirmIcon.innerHTML = icon('trash', 26);
 
-  allCases = chats.list(userEmail).map(chatToCase);
-  render();
+  // Estado de carga mientras el backend responde
+  grid.innerHTML = '<div class="empty-state"><p>Cargando casos…</p></div>';
+  reload();
 
   // ---------- Eventos ----------
   selectModeBtn.addEventListener('click', () => setSelectMode(!selectMode));
