@@ -7,9 +7,9 @@ class CreateIdeaCaseUseCase:
     def __init__(self, idea_case_repository: IdeaCaseRepository):
         self.idea_case_repository = idea_case_repository
 
-    async def execute(self, dto: CreateIdeaCaseDTO) -> IdeaCase:
+    async def execute(self, dto: CreateIdeaCaseDTO, owner_id: UUID) -> IdeaCase:
         new_case = IdeaCase(
-            owner_id=dto.owner_id,
+            owner_id=owner_id,
             title=dto.title,
             description=dto.description,
             category=dto.category,

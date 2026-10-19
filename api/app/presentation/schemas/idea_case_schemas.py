@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from uuid import UUID
 from datetime import datetime
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 
 class IdeaCaseResponseSchema(BaseModel):
     id: UUID
@@ -16,3 +16,10 @@ class IdeaCaseResponseSchema(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class IdeaCaseListResponseSchema(BaseModel):
+    data: List[IdeaCaseResponseSchema]
+    total: int
+    limit: int
+    offset: int
