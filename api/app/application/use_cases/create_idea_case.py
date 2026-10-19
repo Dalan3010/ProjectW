@@ -13,6 +13,6 @@ class CreateIdeaCaseUseCase:
             title=dto.title,
             description=dto.description,
             category=dto.category,
-            metadata_json=dto.metadata or {}
+            metadata=dto.metadata or {}
         )
         return await self.idea_case_repository.create(new_case)

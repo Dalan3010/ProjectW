@@ -10,12 +10,9 @@ class SQLAlchemyIdeaCaseRepository(IdeaCaseRepository):
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def get_by_id(self, case_id: UUID) -> Optional[IdeaCase]:
-        result = await self.session.execute(select(IdeaCaseORM).where(IdeaCaseORM.id == case_id))
-        orm_case = result.scalar_one_or_none()
-        if not orm_case:
-            return None
-        
+    @staticmethod
+    def _to_entity(orm_case: IdeaCaseORM) -> IdeaCase:
+        # Mapeo canónico: columna ORM metadata_json <-> campo de entidad metadata.
         return IdeaCase(
             id=orm_case.id,
             owner_id=orm_case.owner_id,
@@ -25,25 +22,21 @@ class SQLAlchemyIdeaCaseRepository(IdeaCaseRepository):
             status=orm_case.status,
             created_at=orm_case.created_at,
             updated_at=orm_case.updated_at,
-            metadata_json=orm_case.metadata_json
+            metadata=orm_case.metadata_json or {}
         )
+
+    async def get_by_id(self, case_id: UUID) -> Optional[IdeaCase]:
+        result = await self.session.execute(select(IdeaCaseORM).where(IdeaCaseORM.id == case_id))
+        orm_case = result.scalar_one_or_none()
+        if not orm_case:
+            return None
+
+        return self._to_entity(orm_case)
 
     async def get_by_owner(self, owner_id: UUID) -> List[IdeaCase]:
         result = await self.session.execute(select(IdeaCaseORM).where(IdeaCaseORM.owner_id == owner_id))
         orm_cases = result.scalars().all()
-        return [
-            IdeaCase(
-                id=c.id,
-                owner_id=c.owner_id,
-                title=c.title,
-                description=c.description,
-                category=c.category,
-                status=c.status,
-                created_at=c.created_at,
-                updated_at=c.updated_at,
-                metadata_json=c.metadata_json
-            ) for c in orm_cases
-        ]
+        return [self._to_entity(c) for c in orm_cases]
 
     async def create(self, idea_case: IdeaCase) -> IdeaCase:
         orm_case = IdeaCaseORM(
@@ -55,12 +48,12 @@ class SQLAlchemyIdeaCaseRepository(IdeaCaseRepository):
             status=idea_case.status,
             created_at=idea_case.created_at,
             updated_at=idea_case.updated_at,
-            metadata_json=idea_case.metadata_json
+            metadata_json=idea_case.metadata
         )
         self.session.add(orm_case)
         await self.session.commit()
         await self.session.refresh(orm_case)
-        return idea_case
+        return self._to_entity(orm_case)
 
     async def update(self, idea_case: IdeaCase) -> IdeaCase:
         # Implementation of update
@@ -69,19 +62,7 @@ class SQLAlchemyIdeaCaseRepository(IdeaCaseRepository):
     async def list_all(self, limit: int = 10, offset: int = 0) -> List[IdeaCase]:
         result = await self.session.execute(select(IdeaCaseORM).offset(offset).limit(limit))
         orm_cases = result.scalars().all()
-        return [
-            IdeaCase(
-                id=c.id,
-                owner_id=c.owner_id,
-                title=c.title,
-                description=c.description,
-                category=c.category,
-                status=c.status,
-                created_at=c.created_at,
-                updated_at=c.updated_at,
-                metadata_json=c.metadata_json
-            ) for c in orm_cases
-        ]
+        return [self._to_entity(c) for c in orm_cases]
 
     async def delete(self, case_id: UUID) -> bool:
         result = await self.session.execute(select(IdeaCaseORM).where(IdeaCaseORM.id == case_id))
