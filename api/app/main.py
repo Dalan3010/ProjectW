@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.presentation.api import cases
+from app.presentation.api import auth, cases
 
 app = FastAPI(
     title="Jak Business Idea Discovery API",
@@ -8,6 +8,7 @@ app = FastAPI(
 )
 
 app.include_router(cases.router)
+app.include_router(auth.router)
 
 @app.get("/")
 async def root():

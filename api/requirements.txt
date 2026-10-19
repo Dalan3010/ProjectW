@@ -11,6 +11,8 @@ python-dotenv==1.0.0
 httpx==0.26.0
 pyjwt==2.8.0
 passlib[bcrypt]==1.7.4
+# bcrypt se fija explícitamente: passlib 1.7.4 es incompatible con bcrypt >= 4.1
+bcrypt==4.0.1
 cryptography==42.0.2
 python-multipart==0.0.6
 
