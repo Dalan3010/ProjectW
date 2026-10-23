@@ -52,6 +52,24 @@ export function LoginPage() {
     }
   }
 
+  async function handleDemoLogin() {
+    setError('')
+    setSubmitting(true)
+    try {
+      const demoEmail = 'demo@bid.local'
+      const demoPassword = 'demo1234'
+      try {
+        await login(demoEmail, demoPassword)
+      } catch {
+        await register({ name: 'Usuario Demo', email: demoEmail, password: demoPassword })
+      }
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'No se pudo iniciar sesión demo.')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
   return (
     <div className="login-page">
       <header className="login-header">
@@ -168,6 +186,15 @@ export function LoginPage() {
                       : 'Iniciar sesión'}
                 </button>
               </form>
+              <button
+                type="button"
+                className="btn btn-ghost btn-block"
+                style={{ marginTop: 12 }}
+                disabled={submitting}
+                onClick={() => void handleDemoLogin()}
+              >
+                Entrar como demo
+              </button>
               <p className="auth-error" hidden={!error}>
                 {error}
               </p>
