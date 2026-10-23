@@ -21,8 +21,8 @@ function WelcomeLogo() {
     >
       <defs>
         <linearGradient id="welcome-logo-grad" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#8b5cf6" />
-          <stop offset="1" stopColor="#a78bfa" />
+          <stop offset="0" stopColor="#7c3aed" />
+          <stop offset="1" stopColor="#8b5cf6" />
         </linearGradient>
       </defs>
       <rect

@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Footer } from '../components/Footer'
 import { LandingNavbar } from '../components/LandingNavbar'
+import { ZodiacBackground } from '../components/ZodiacBackground'
 import { usePageMeta } from '../hooks/usePageMeta'
 
 export function LandingPage() {
@@ -11,6 +12,7 @@ export function LandingPage() {
 
   return (
     <>
+      <ZodiacBackground />
       <LandingNavbar />
 
       <main>
