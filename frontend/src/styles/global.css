@@ -985,7 +985,9 @@ main,
 .cases-grid {
   display: grid;
   gap: 20px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  /* Columns follow the space actually available, capped at three tracks
+     by the current 1100px page container. */
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr));
 }
 
 .case-card {
@@ -1022,6 +1024,12 @@ main,
       inset 0 1px 0 rgba(255, 255, 255, 0.04),
       0 14px 30px -18px rgba(0, 0, 0, 0.8),
       0 0 0 1px rgba(139, 92, 246, 0.08);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .case-card:hover {
+    transform: none;
   }
 }
 
@@ -1833,12 +1841,6 @@ main,
 /* ================================================================
    Responsive — Casos y Chat
    ================================================================ */
-
-@media (max-width: 1024px) {
-  .cases-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
 
 @media (max-width: 768px) {
   .cases-grid {
