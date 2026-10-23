@@ -284,8 +284,10 @@ export function CasesPage() {
                     <span className="case-select" aria-hidden="true">
                       <Icon name="check" size={14} />
                     </span>
-                    <h3 className="case-title">{item.title}</h3>
-                    <p className="case-summary">{item.summary}</p>
+                    <div className="case-body">
+                      <h3 className="case-title">{item.title}</h3>
+                      <p className="case-summary">{item.summary}</p>
+                    </div>
                     <div className="case-footer">
                       <span className="msg-count">
                         <Icon name="chat" size={14} /> {item.messageCount} mensaje
