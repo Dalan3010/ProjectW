@@ -35,4 +35,19 @@ describe('LandingPage', () => {
     expect(container.querySelectorAll('.constellation')).toHaveLength(12)
     expect(container.querySelectorAll('.lone-star')).toHaveLength(6)
   })
+
+  it('writes pointer parallax CSS variables on pointer move', () => {
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
+      cb(0)
+      return 1
+    })
+
+    const { container } = renderLanding()
+    const background = container.querySelector('.zodiac-background') as HTMLElement
+
+    window.dispatchEvent(new MouseEvent('pointermove', { clientX: 1000, clientY: 600 }))
+
+    expect(background.style.getPropertyValue('--pointer-x')).not.toBe('')
+    expect(background.style.getPropertyValue('--pointer-y')).not.toBe('')
+  })
 })

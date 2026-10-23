@@ -1,10 +1,12 @@
 import { useRef } from "react";
 import { constellations, LINE_STROKE } from "../data/constellations";
+import { useConstellationParallax } from "../hooks/useConstellationParallax";
 import { useStarTwinkle } from "../hooks/useStarTwinkle";
 
 export function ZodiacBackground() {
   const backgroundRef = useRef<HTMLDivElement>(null);
   useStarTwinkle(backgroundRef);
+  useConstellationParallax(backgroundRef);
 
   return (
     <div className="zodiac-background" aria-hidden="true" ref={backgroundRef}>

@@ -613,6 +613,9 @@ h1, h2, h3, h4, h5, h6 {
   z-index: 0;
   overflow: hidden;
   pointer-events: none;
+  --pointer-x: 0px;
+  --pointer-y: 0px;
+  --pointer-rot: 0deg;
 }
 
 main,
@@ -625,7 +628,14 @@ main,
   position: absolute;
   pointer-events: none;
   opacity: var(--z-o, 0.12);
-  animation: zodiac-breathe 24s ease-in-out infinite;
+  --drift-x: 0px;
+  --drift-y: 0px;
+  --drift-rot: 0deg;
+  --depth: 1;
+  will-change: transform, opacity;
+  animation:
+    zodiac-breathe var(--z-dur, 24s) ease-in-out var(--z-delay, 0s) infinite,
+    zodiac-drift var(--drift-dur, 48s) ease-in-out var(--drift-delay, 0s) infinite alternate;
 }
 
 .constellation svg,
@@ -643,9 +653,10 @@ main,
   filter: drop-shadow(0 0 3px rgba(147, 197, 253, 0.8));
 }
 
-/* Líneas: MUY sutiles (jerarquía: líneas << estrellas). Al subir el contenedor
-   a 0.55-0.84, un stroke bajo (~0.22) deja un efectivo de ~0.12-0.20. No
-   parpadean; solo respiran con el contenedor. Glow morado muy discreto. */
+/* Lines: VERY subtle (hierarchy: lines << stars). With the container raised
+   to 0.55-0.84, a low stroke (~0.22) yields an effective ~0.12-0.20. They do
+   not twinkle; they drift and breathe along with their container. Very
+   discreet violet glow. */
 .zodiac-background svg path {
   stroke: rgba(228, 231, 240, 0.22);
   filter: drop-shadow(0 0 1.5px rgba(139, 92, 246, 0.3));
@@ -661,12 +672,28 @@ main,
   }
 }
 
-/* Las estrellas titilan con Anime.js (useStarTwinkle), que escribe
-   opacity/transform inline por estrella con parámetros pseudoaleatorios
-   generados al montar.
-   El scale se centra en cada círculo para un crecimiento simétrico y sutil.
-   Las líneas (<path>) NO titilan: solo respiran con el contenedor (24-36s),
-   es decir, permanecen prácticamente estáticas. */
+@keyframes zodiac-drift {
+  from {
+    transform: translate3d(
+      calc(var(--pointer-x, 0px) * var(--depth, 1)),
+      calc(var(--pointer-y, 0px) * var(--depth, 1)),
+      0
+    ) rotate(calc(var(--pointer-rot, 0deg) * var(--depth, 1)));
+  }
+  to {
+    transform: translate3d(
+      calc(var(--pointer-x, 0px) * var(--depth, 1) + var(--drift-x, 0px)),
+      calc(var(--pointer-y, 0px) * var(--depth, 1) + var(--drift-y, 0px)),
+      0
+    ) rotate(calc(var(--pointer-rot, 0deg) * var(--depth, 1) + var(--drift-rot, 0deg)));
+  }
+}
+
+/* Stars twinkle via Anime.js (useStarTwinkle), which writes per-star inline
+   opacity/transform with pseudo-random parameters generated on mount.
+   Scale is centered on each circle for symmetric, subtle growth.
+   Containers now drift AND breathe (opacity) while stars keep twinkling on
+   top; lines (<path>) never twinkle and simply follow their container. */
 .zodiac-background svg circle {
   transform-box: fill-box;
   transform-origin: center;
