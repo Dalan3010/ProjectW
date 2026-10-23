@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { casesApi } from '../api/cases'
+import { getToken } from '../api/client'
 import { AppNavbar } from '../components/AppNavbar'
 import { Footer } from '../components/Footer'
 import { Icon } from '../components/Icon'
@@ -18,6 +19,24 @@ interface NormalizedCase {
 
 const SUMMARY_LENGTH = 150
 const EMPTY_SUMMARY = 'Todavía no hay mensajes. Abrí este caso para empezar la conversación.'
+
+const DEMO_CASES: NormalizedCase[] = [
+  {
+    id: 'demo-c1',
+    title: 'Marketplace de artesanos locales',
+    summary:
+      'Conectar artesanos con compradores buscando productos únicos hechos a mano.',
+    messageCount: 4,
+    updatedAt: new Date(Date.now() - 3_600_000).toISOString(),
+  },
+  {
+    id: 'demo-c2',
+    title: 'App de reciclaje con recompensas',
+    summary: 'Sistema de puntos por reciclar con incentivos y comercio local.',
+    messageCount: 2,
+    updatedAt: new Date(Date.now() - 7_200_000).toISOString(),
+  },
+]
 
 function normalizeCase(item: IdeaCase): NormalizedCase {
   const rawSummary = (item.summary ?? '').trim()
@@ -59,6 +78,11 @@ export function CasesPage() {
   const load = useCallback(async () => {
     setLoading(true)
     setError('')
+    if (getToken() === 'demo-token') {
+      setAllCases(DEMO_CASES)
+      setLoading(false)
+      return DEMO_CASES
+    }
     try {
       const response = await casesApi.list()
       const next = (response.data ?? []).map(normalizeCase)

@@ -73,6 +73,9 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
   // session: let the login form show the server message instead of reloading.
   const isCredentialRequest = path === '/auth/login' || path === '/auth/register'
   if (response.status === 401 && !isCredentialRequest) {
+    if (token === 'demo-token') {
+      throw new ApiError('Sesión demo no disponible en modo sin servidor.', 401)
+    }
     clearToken()
     window.location.assign('/login')
     throw new ApiError('Tu sesión expiró. Inicia sesión de nuevo.', 401)
