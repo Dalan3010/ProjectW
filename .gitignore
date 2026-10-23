@@ -24,3 +24,9 @@ alembic/versions/*.py
 
 # OS
 Thumbs.db
+
+# Node / Vite
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
