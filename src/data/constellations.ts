@@ -1,0 +1,395 @@
+import type { CSSProperties } from "react";
+
+export interface Star {
+  cx: number;
+  cy: number;
+  r: number;
+  fill: string;
+  opacity?: number;
+  glow?: "violet" | "blue";
+}
+
+export type ZodiacStyle = CSSProperties & {
+  "--z-o": number;
+  "--z-o2": number;
+};
+
+export interface Constellation {
+  id: string;
+  className: string;
+  style: ZodiacStyle;
+  path?: string;
+  stars: Star[];
+}
+
+const LINE_STROKE = "rgba(231, 231, 235, 0.45)";
+
+export const constellations: Constellation[] = [
+  {
+    id: "aries",
+    className: "constellation cz-aries",
+    style: {
+      top: "3%",
+      left: "-70px",
+      width: "240px",
+      "--z-o": 0.66,
+      "--z-o2": 0.86,
+      animationDuration: "26s",
+      animationDelay: "-3s",
+    },
+    path: "M32 58 L44 46 L58 40 L74 52",
+    stars: [
+      { cx: 32, cy: 58, r: 1.1, fill: "#e4e4e7" },
+      { cx: 44, cy: 46, r: 0.9, fill: "#d4d4d8" },
+      { cx: 58, cy: 40, r: 1.8, fill: "#c4b5fd", glow: "violet" },
+      { cx: 74, cy: 52, r: 1, fill: "#e4e4e7" },
+      { cx: 28, cy: 66, r: 0.7, fill: "#a1a1aa" },
+      { cx: 80, cy: 60, r: 0.6, fill: "#bfdbfe", opacity: 0.7 },
+    ],
+  },
+  {
+    id: "taurus",
+    className: "constellation cz-taurus",
+    style: {
+      top: "7%",
+      right: "-80px",
+      width: "260px",
+      "--z-o": 0.7,
+      "--z-o2": 0.9,
+      animationDuration: "24s",
+      animationDelay: "-6s",
+    },
+    path: "M30 32 L38 46 L46 52 M44 54 L64 30 L78 40 M46 54 L76 56",
+    stars: [
+      { cx: 46, cy: 54, r: 2, fill: "#c4b5fd", glow: "violet" },
+      { cx: 30, cy: 32, r: 1, fill: "#e4e4e7" },
+      { cx: 38, cy: 46, r: 0.9, fill: "#d4d4d8" },
+      { cx: 64, cy: 30, r: 1.1, fill: "#e4e4e7" },
+      { cx: 78, cy: 40, r: 0.8, fill: "#e4e4e7" },
+      { cx: 76, cy: 56, r: 0.9, fill: "#bfdbfe" },
+      { cx: 88, cy: 62, r: 0.6, fill: "#bfdbfe", opacity: 0.6 },
+    ],
+  },
+  {
+    id: "gemini",
+    className: "constellation cz-gemini",
+    style: {
+      top: "16%",
+      left: "-55px",
+      width: "230px",
+      "--z-o": 0.62,
+      "--z-o2": 0.82,
+      animationDuration: "27s",
+      animationDelay: "-9s",
+    },
+    path: "M30 24 L28 40 L33 56 L30 74 M58 22 L60 38 L55 54 L58 72 M30 74 L58 72 M33 56 L55 54 M28 40 L60 38",
+    stars: [
+      { cx: 30, cy: 24, r: 1.8, fill: "#c4b5fd", glow: "violet" },
+      { cx: 58, cy: 22, r: 1.9, fill: "#bfdbfe", glow: "blue" },
+      { cx: 28, cy: 40, r: 0.9, fill: "#e4e4e7" },
+      { cx: 33, cy: 56, r: 0.8, fill: "#d4d4d8" },
+      { cx: 30, cy: 74, r: 0.9, fill: "#e4e4e7" },
+      { cx: 60, cy: 38, r: 0.9, fill: "#e4e4e7" },
+      { cx: 55, cy: 54, r: 0.8, fill: "#d4d4d8" },
+      { cx: 58, cy: 72, r: 0.9, fill: "#e4e4e7" },
+    ],
+  },
+  {
+    id: "cancer",
+    className: "constellation cz-cancer",
+    style: {
+      top: "21%",
+      right: "-50px",
+      width: "170px",
+      "--z-o": 0.58,
+      "--z-o2": 0.78,
+      animationDuration: "30s",
+      animationDelay: "-2s",
+    },
+    path: "M50 24 L42 40 L34 60 M50 24 L58 38 L66 56 M42 40 L58 38",
+    stars: [
+      { cx: 50, cy: 24, r: 1.5, fill: "#bfdbfe", glow: "blue" },
+      { cx: 42, cy: 40, r: 1, fill: "#e4e4e7" },
+      { cx: 34, cy: 60, r: 0.8, fill: "#d4d4d8" },
+      { cx: 58, cy: 38, r: 0.9, fill: "#e4e4e7" },
+      { cx: 66, cy: 56, r: 0.8, fill: "#e4e4e7" },
+      { cx: 48, cy: 30, r: 0.5, fill: "#e4e4e7", opacity: 0.8 },
+      { cx: 52, cy: 34, r: 0.5, fill: "#e4e4e7", opacity: 0.8 },
+      { cx: 44, cy: 35, r: 0.5, fill: "#e4e4e7", opacity: 0.8 },
+    ],
+  },
+  {
+    id: "libra",
+    className: "constellation cz-libra",
+    style: {
+      top: "44%",
+      left: "6%",
+      width: "200px",
+      "--z-o": 0.64,
+      "--z-o2": 0.84,
+      animationDuration: "25s",
+      animationDelay: "-11s",
+    },
+    path: "M30 38 L50 28 L72 44 L42 62 L30 38 M50 28 L42 62 M30 38 L72 44",
+    stars: [
+      { cx: 50, cy: 28, r: 1.7, fill: "#bfdbfe", glow: "blue" },
+      { cx: 30, cy: 38, r: 1.1, fill: "#e4e4e7" },
+      { cx: 72, cy: 44, r: 1, fill: "#e4e4e7" },
+      { cx: 42, cy: 62, r: 1.3, fill: "#c4b5fd", glow: "violet" },
+      { cx: 56, cy: 34, r: 0.6, fill: "#e4e4e7", opacity: 0.8 },
+    ],
+  },
+  {
+    id: "scorpio",
+    className: "constellation cz-scorpio",
+    style: {
+      top: "46%",
+      right: "6%",
+      width: "210px",
+      "--z-o": 0.72,
+      "--z-o2": 0.92,
+      animationDuration: "23s",
+      animationDelay: "-5s",
+    },
+    path: "M72 20 L58 28 L50 42 L44 52 L38 62 L28 74 L34 82 L44 86",
+    stars: [
+      { cx: 72, cy: 20, r: 1.1, fill: "#e4e4e7" },
+      { cx: 58, cy: 28, r: 1, fill: "#e4e4e7" },
+      { cx: 50, cy: 42, r: 0.9, fill: "#d4d4d8" },
+      { cx: 44, cy: 52, r: 2.1, fill: "#c4b5fd", glow: "violet" },
+      { cx: 38, cy: 62, r: 0.9, fill: "#e4e4e7" },
+      { cx: 28, cy: 74, r: 0.8, fill: "#d4d4d8" },
+      { cx: 34, cy: 82, r: 0.7, fill: "#e4e4e7" },
+      { cx: 44, cy: 86, r: 0.8, fill: "#e4e4e7" },
+    ],
+  },
+  {
+    id: "sagittarius",
+    className: "constellation cz-sagittarius",
+    style: {
+      top: "13%",
+      right: "16%",
+      width: "230px",
+      "--z-o": 0.6,
+      "--z-o2": 0.8,
+      animationDuration: "28s",
+      animationDelay: "-14s",
+    },
+    path: "M30 44 L46 34 L64 42 L70 54 L58 70 L40 64 L32 54 L30 44 M20 40 L30 44 M70 54 L78 50",
+    stars: [
+      { cx: 20, cy: 40, r: 0.9, fill: "#e4e4e7" },
+      { cx: 46, cy: 34, r: 1.1, fill: "#e4e4e7" },
+      { cx: 64, cy: 42, r: 1.2, fill: "#bfdbfe", glow: "blue" },
+      { cx: 70, cy: 54, r: 0.9, fill: "#e4e4e7" },
+      { cx: 58, cy: 70, r: 1, fill: "#e4e4e7" },
+      { cx: 40, cy: 64, r: 1, fill: "#e4e4e7" },
+      { cx: 32, cy: 54, r: 0.8, fill: "#d4d4d8" },
+      { cx: 30, cy: 44, r: 0.8, fill: "#e4e4e7" },
+      { cx: 78, cy: 50, r: 0.9, fill: "#e4e4e7" },
+      { cx: 52, cy: 52, r: 0.6, fill: "#e4e4e7", opacity: 0.8 },
+    ],
+  },
+  {
+    id: "aquarius",
+    className: "constellation cz-aquarius",
+    style: {
+      top: "27%",
+      left: "12%",
+      width: "190px",
+      "--z-o": 0.58,
+      "--z-o2": 0.78,
+      animationDuration: "29s",
+      animationDelay: "-8s",
+    },
+    path: "M26 56 L38 48 L50 56 L62 46 L74 54 M50 56 L56 72 L50 84 M56 72 L66 80",
+    stars: [
+      { cx: 26, cy: 56, r: 0.9, fill: "#e4e4e7" },
+      { cx: 38, cy: 48, r: 1.5, fill: "#bfdbfe", glow: "blue" },
+      { cx: 50, cy: 56, r: 1, fill: "#e4e4e7" },
+      { cx: 62, cy: 46, r: 0.9, fill: "#e4e4e7" },
+      { cx: 74, cy: 54, r: 0.8, fill: "#d4d4d8" },
+      { cx: 56, cy: 72, r: 1, fill: "#e4e4e7" },
+      { cx: 50, cy: 84, r: 0.8, fill: "#e4e4e7" },
+      { cx: 66, cy: 80, r: 0.8, fill: "#e4e4e7" },
+      { cx: 46, cy: 30, r: 0.6, fill: "#c4b5fd", opacity: 0.6 },
+    ],
+  },
+  {
+    id: "pisces",
+    className: "constellation cz-pisces",
+    style: {
+      top: "31%",
+      right: "9%",
+      width: "200px",
+      "--z-o": 0.6,
+      "--z-o2": 0.8,
+      animationDuration: "26s",
+      animationDelay: "-17s",
+    },
+    path: "M28 30 L16 48 L30 58 L42 46 L28 30 M70 24 L60 42 L74 52 L84 40 L70 24 M42 46 L60 42",
+    stars: [
+      { cx: 42, cy: 46, r: 1.2, fill: "#c4b5fd", glow: "violet" },
+      { cx: 60, cy: 42, r: 1.2, fill: "#bfdbfe", glow: "blue" },
+      { cx: 16, cy: 48, r: 0.9, fill: "#e4e4e7" },
+      { cx: 30, cy: 58, r: 0.8, fill: "#d4d4d8" },
+      { cx: 70, cy: 24, r: 0.9, fill: "#e4e4e7" },
+      { cx: 84, cy: 40, r: 0.8, fill: "#e4e4e7" },
+      { cx: 51, cy: 44, r: 0.5, fill: "#e4e4e7", opacity: 0.8 },
+    ],
+  },
+  {
+    id: "capricorn",
+    className: "constellation cz-capricorn",
+    style: {
+      top: "58%",
+      left: "2%",
+      width: "190px",
+      "--z-o": 0.55,
+      "--z-o2": 0.75,
+      animationDuration: "31s",
+      animationDelay: "-20s",
+    },
+    path: "M30 26 L48 38 L44 52 L58 64 L74 58 M58 64 L52 78 L66 86",
+    stars: [
+      { cx: 30, cy: 26, r: 1.4, fill: "#c4b5fd", glow: "violet" },
+      { cx: 48, cy: 38, r: 0.9, fill: "#e4e4e7" },
+      { cx: 44, cy: 52, r: 0.8, fill: "#d4d4d8" },
+      { cx: 58, cy: 64, r: 1, fill: "#e4e4e7" },
+      { cx: 74, cy: 58, r: 0.9, fill: "#e4e4e7" },
+      { cx: 52, cy: 78, r: 0.7, fill: "#e4e4e7" },
+      { cx: 66, cy: 86, r: 0.8, fill: "#e4e4e7" },
+    ],
+  },
+  {
+    id: "leo",
+    className: "constellation cz-leo",
+    style: {
+      bottom: "5%",
+      left: "-70px",
+      width: "240px",
+      "--z-o": 0.7,
+      "--z-o2": 0.9,
+      animationDuration: "25s",
+      animationDelay: "-12s",
+    },
+    path: "M40 60 L34 48 L38 36 L48 28 L60 30 L66 40 M40 60 L52 70 L64 78 M66 40 L52 70",
+    stars: [
+      { cx: 40, cy: 60, r: 2, fill: "#c4b5fd", glow: "violet" },
+      { cx: 34, cy: 48, r: 0.9, fill: "#e4e4e7" },
+      { cx: 38, cy: 36, r: 0.8, fill: "#d4d4d8" },
+      { cx: 48, cy: 28, r: 1, fill: "#e4e4e7" },
+      { cx: 60, cy: 30, r: 0.9, fill: "#e4e4e7" },
+      { cx: 66, cy: 40, r: 1, fill: "#e4e4e7" },
+      { cx: 52, cy: 70, r: 0.9, fill: "#e4e4e7" },
+      { cx: 64, cy: 78, r: 1.4, fill: "#bfdbfe", glow: "blue" },
+    ],
+  },
+  {
+    id: "virgo",
+    className: "constellation cz-virgo",
+    style: {
+      bottom: "9%",
+      right: "-90px",
+      width: "260px",
+      "--z-o": 0.64,
+      "--z-o2": 0.84,
+      animationDuration: "27s",
+      animationDelay: "-1s",
+    },
+    path: "M28 66 L42 48 L52 34 L42 20 M52 34 L68 26",
+    stars: [
+      { cx: 28, cy: 66, r: 2, fill: "#c4b5fd", glow: "violet" },
+      { cx: 42, cy: 48, r: 1, fill: "#e4e4e7" },
+      { cx: 52, cy: 34, r: 1.1, fill: "#e4e4e7" },
+      { cx: 42, cy: 20, r: 0.9, fill: "#e4e4e7" },
+      { cx: 68, cy: 26, r: 1, fill: "#e4e4e7" },
+      { cx: 58, cy: 44, r: 0.6, fill: "#e4e4e7", opacity: 0.8 },
+    ],
+  },
+  {
+    id: "lone-star-1",
+    className: "lone-star",
+    style: {
+      top: "8%",
+      left: "26%",
+      width: "26px",
+      "--z-o": 0.8,
+      "--z-o2": 0.96,
+      animationDuration: "33s",
+      animationDelay: "-4s",
+    },
+    stars: [{ cx: 50, cy: 50, r: 7, fill: "#e4e4e7" }],
+  },
+  {
+    id: "lone-star-2",
+    className: "lone-star",
+    style: {
+      top: "18%",
+      right: "34%",
+      width: "22px",
+      "--z-o": 0.75,
+      "--z-o2": 0.95,
+      animationDuration: "36s",
+      animationDelay: "-15s",
+    },
+    stars: [{ cx: 50, cy: 50, r: 7, fill: "#c4b5fd", opacity: 0.8 }],
+  },
+  {
+    id: "lone-star-3",
+    className: "lone-star",
+    style: {
+      top: "52%",
+      left: "20%",
+      width: "28px",
+      "--z-o": 0.84,
+      "--z-o2": 0.98,
+      animationDuration: "31s",
+      animationDelay: "-9s",
+    },
+    stars: [{ cx: 50, cy: 50, r: 7, fill: "#e4e4e7" }],
+  },
+  {
+    id: "lone-star-4",
+    className: "lone-star",
+    style: {
+      top: "62%",
+      right: "24%",
+      width: "24px",
+      "--z-o": 0.75,
+      "--z-o2": 0.95,
+      animationDuration: "35s",
+      animationDelay: "-22s",
+    },
+    stars: [{ cx: 50, cy: 50, r: 7, fill: "#bfdbfe", opacity: 0.8 }],
+  },
+  {
+    id: "lone-star-5",
+    className: "lone-star",
+    style: {
+      bottom: "12%",
+      left: "36%",
+      width: "30px",
+      "--z-o": 0.84,
+      "--z-o2": 0.98,
+      animationDuration: "29s",
+      animationDelay: "-18s",
+    },
+    stars: [{ cx: 50, cy: 50, r: 7, fill: "#e4e4e7" }],
+  },
+  {
+    id: "lone-star-6",
+    className: "lone-star",
+    style: {
+      bottom: "18%",
+      right: "18%",
+      width: "22px",
+      "--z-o": 0.75,
+      "--z-o2": 0.95,
+      animationDuration: "34s",
+      animationDelay: "-11s",
+    },
+    stars: [{ cx: 50, cy: 50, r: 7, fill: "#c4b5fd", opacity: 0.8 }],
+  },
+];
+
+export { LINE_STROKE };

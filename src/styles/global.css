@@ -660,8 +660,9 @@ main,
   }
 }
 
-/* Las estrellas titilan con Anime.js (app.js), que escribe opacity/transform
-   inline por estrella con parámetros pseudoaleatorios generados al iniciar.
+/* Las estrellas titilan con Anime.js (useStarTwinkle), que escribe
+   opacity/transform inline por estrella con parámetros pseudoaleatorios
+   generados al montar.
    El scale se centra en cada círculo para un crecimiento simétrico y sutil.
    Las líneas (<path>) NO titilan: solo respiran con el contenedor (24-36s),
    es decir, permanecen prácticamente estáticas. */
@@ -670,9 +671,9 @@ main,
   transform-origin: center;
 }
 
-/* FALLBACK (solo si Anime.js no está disponible): titileo CSS por estrella.
-   app.js añade estas clases y --tw-* solo cuando window.anime no existe o
-   animate() falla; cuando Anime.js funciona no se aplican (evita conflictos). */
+/* FALLBACK (solo si Anime.js falla): titileo CSS por estrella.
+   useStarTwinkle añade estas clases y --tw-* únicamente cuando animate()
+   lanza un error; si Anime.js funciona no se aplican (evita conflictos). */
 
 @keyframes star-twinkle-soft {
   0%, 100% {
