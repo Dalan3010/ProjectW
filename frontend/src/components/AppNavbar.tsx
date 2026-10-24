@@ -1,15 +1,14 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../context/auth-context'
 import { Brand } from './Brand'
-import { UserChip } from './UserChip'
+import { UserMenu } from './UserMenu' // <-- Asegúrate de que esta línea esté aquí
 
 interface AppNavbarProps {
   active: 'casos' | 'chat'
 }
 
 export function AppNavbar({ active }: AppNavbarProps) {
-  const { session, logout } = useAuth()
-  const navigate = useNavigate()
+  const { session } = useAuth()
 
   if (!session) return null
 
@@ -24,17 +23,10 @@ export function AppNavbar({ active }: AppNavbarProps) {
           <Link to="/chat" className={`nav-link${active === 'chat' ? ' active' : ''}`}>
             Nueva conversación
           </Link>
-          <UserChip session={session} />
-          <button
-            type="button"
-            className="btn btn-ghost navbar-btn"
-            onClick={() => {
-              logout()
-              navigate('/login')
-            }}
-          >
-            Salir
-          </button>
+          
+          {/* El nuevo menú debe estar justo aquí */}
+          <UserMenu />
+          
         </div>
       </div>
     </nav>
