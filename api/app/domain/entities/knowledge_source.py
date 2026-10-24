@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 from uuid import UUID, uuid4
 
@@ -11,5 +11,5 @@ class KnowledgeSource:
     source_url: Optional[str] = None
     metadata: dict = field(default_factory=dict)
     embedding: Optional[list[float]] = None
-    created_at: datetime = field(default_factory=datetime.utcnow)
+    created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     version: str = "1.0"

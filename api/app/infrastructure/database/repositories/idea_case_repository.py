@@ -1,6 +1,6 @@
 from typing import List, Optional
 from uuid import UUID
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -67,7 +67,7 @@ class SQLAlchemyIdeaCaseRepository(IdeaCaseRepository):
         orm_case.category = idea_case.category
         orm_case.status = idea_case.status
         orm_case.metadata_json = idea_case.metadata
-        orm_case.updated_at = datetime.utcnow()
+        orm_case.updated_at = datetime.now(timezone.utc)
         await self.session.commit()
         await self.session.refresh(orm_case)
         return self._to_entity(orm_case)
