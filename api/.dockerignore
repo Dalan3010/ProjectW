@@ -1,0 +1,28 @@
+# Secretos y entorno: nunca dentro de la imagen
+.env
+.env.*
+!.env.example
+
+# Control de versiones y metadatos del repo
+.git
+.gitignore
+.gitattributes
+
+# Artefactos de Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+.venv/
+venv/
+
+# Documentación y material no requerido en runtime
+*.md
+modeloEntidad/
+
+# Definiciones de Docker (no se necesitan dentro de la imagen)
+Dockerfile
+.dockerignore

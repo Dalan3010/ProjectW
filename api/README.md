@@ -46,9 +46,21 @@ CORS_ORIGINS=http://localhost:5173,http://localhost:3000
 
 ## Cómo ejecutarla
 
-1. `cp .env.example .env` (desde `api/`) y completar las variables si hace falta.
-2. `docker compose up --build` (desde `api/`).
+1. `cp api/.env.example api/.env` (desde la raíz) y completar las variables si hace falta.
+2. `docker compose up --build` (desde la raíz del repo, donde vive el `docker-compose.yml`).
 3. Verificar en `http://localhost:8000/health`.
+
+> El `docker-compose.yml` de la raíz es el único punto de entrada (fija `name: projectw`, así que los volúmenes se llaman `projectw_postgres_data` y `projectw_n8n_data`). El compose que vivía dentro de `api/` se eliminó para no levantar una segunda base vacía con otro proyecto y otro volumen.
+>
+> Si venías de ese compose viejo y querés conservar los datos, migrá el volumen una sola vez antes de levantar:
+>
+> ```bash
+> docker volume create projectw_postgres_data
+> docker run --rm -v api_postgres_data:/from -v projectw_postgres_data:/to alpine \
+>   sh -c 'cp -av /from/. /to/'
+> ```
+>
+> Si la base era descartable, ignorá este paso: `alembic upgrade head` reconstruye el esquema en el volumen nuevo.
 
 Al arrancar, el servicio `api` ejecuta `alembic upgrade head` (migraciones en el boot) y solo levanta uvicorn si la migración tuvo éxito. El `db` expone un healthcheck (`pg_isready`) y `api` espera a que esté sano (`depends_on: condition: service_healthy`). El comando del `Dockerfile` aplica igual con `docker run` siempre que el contenedor apunte a una base accesible.
 
@@ -57,5 +69,5 @@ Los servicios expuestos son: API en `:8000`, PostgreSQL en `:5432` y n8n en `:56
 ## Pendiente
 
 - Integración del frontend (`js/api/`) con este contrato (snake_case, Bearer token, paginación propia).
-- Smoke test punta a punta con Docker levantado (registro, login, casos).
+- Smoke test punta a punta automatizado (hoy verificado a mano con Docker levantado: registro, login, alta de caso, listado, detalle y borrado).
 - Chat / mensajes: decisión de producto pendiente (fuera de alcance de la parte 2).
