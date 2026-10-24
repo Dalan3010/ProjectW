@@ -1,5 +1,6 @@
-import { useState, type FormEvent } from 'react'
+import { useState, useEffect, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
+
 import { Brand } from '../components/Brand'
 import { Footer } from '../components/Footer'
 import { useAuth } from '../context/auth-context'
@@ -16,6 +17,10 @@ export function LoginPage() {
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
+  // Estados para las animaciones del personaje
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false)
+  const [pupilPosition, setPupilPosition] = useState({ x: 0, y: 0 })
+
   usePageMeta(
     session ? 'Sesión iniciada — BID' : 'Iniciar sesión — BID',
     'Inicia sesión en BID para continuar con tus ideas de negocio.',
@@ -26,6 +31,33 @@ export function LoginPage() {
   function switchMode() {
     setMode(isRegister ? 'login' : 'register')
     setError('')
+  }
+
+  // Efecto para que los ojos sigan el mouse
+  useEffect(() => {
+    // Si los ojos están tapados, no seguimos el mouse
+    if (isPasswordFocused) return
+
+    const handleMouseMove = (event: MouseEvent) => {
+      // Calculamos la posición del mouse relativa a la ventana para mover las pupilas (rango de -6px a 6px)
+      const x = (event.clientX / window.innerWidth) * 12 - 6
+      const y = (event.clientY / window.innerHeight) * 12 - 6
+      setPupilPosition({ x, y })
+    }
+
+    window.addEventListener('mousemove', handleMouseMove)
+    return () => window.removeEventListener('mousemove', handleMouseMove)
+  }, [isPasswordFocused])
+
+  // Funciones para tapar/destapar ojos
+  function coverEyes() {
+    setIsPasswordFocused(true)
+    // Centramos las pupilas cuando se tapan los ojos
+    setPupilPosition({ x: 0, y: 0 })
+  }
+
+  function uncoverEyes() {
+    setIsPasswordFocused(false)
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -86,7 +118,7 @@ export function LoginPage() {
               ? 'Inicia sesión para continuar con tus ideas de negocio.'
               : isRegister
                 ? 'Regístrate gratis y empieza a trabajar en tus ideas.'
-                : 'Inicia sesión para continuar con tus ideas de negocio.'}
+                : ''}
           </p>
 
           {session ? (
@@ -125,6 +157,67 @@ export function LoginPage() {
             </div>
           ) : (
             <>
+              {/* Personaje animado con React States y CSS inline */}
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '25px' }}>
+                <svg viewBox="0 0 200 150" width="140" height="105" style={{ overflow: 'visible' }}>
+                  {/* Cuerpo del personaje principal */}
+                  <rect x="40" y="20" width="120" height="130" rx="40" fill="#5b21b6" />
+                  
+                  {/* Fondo blanco de los Ojos */}
+                  <circle cx="80" cy="70" r="12" fill="#ffffff" />
+                  <circle cx="120" cy="70" r="12" fill="#ffffff" />
+                  
+                  {/* Pupilas dinámicas (Siguen el mouse) */}
+                  <g style={{
+                    transform: `translate(${pupilPosition.x}px, ${pupilPosition.y}px)`,
+                    transition: 'transform 0.1s ease-out'
+                  }}>
+                    <circle cx="80" cy="70" r="5" fill="#000000" />
+                    <circle cx="120" cy="70" r="5" fill="#000000" />
+                  </g>
+                  
+                  {/* Boca */}
+                  <path 
+                    d={isPasswordFocused ? "M 95 100 Q 100 95 105 100" : "M 90 95 Q 100 105 110 95"} 
+                    fill="none" 
+                    stroke="#ffffff" 
+                    strokeWidth="4" 
+                    strokeLinecap="round" 
+                    style={{ transition: 'd 0.3s ease' }}
+                  />
+                  
+                  {/* Brazos dinámicos (Suben más y se expanden para cubrir mejor) */}
+                  <g>
+                    <rect 
+                      x="60" 
+                      y="130" 
+                      width="25" 
+                      height="40" 
+                      rx="12.5" 
+                      fill="#3b0764" 
+                      style={{ 
+                        transformOrigin: '72px 150px',
+                        transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                        transform: isPasswordFocused ? 'translateY(-65px) rotate(35deg) scale(1.3)' : 'translateY(0) rotate(0) scale(1)'
+                      }} 
+                    />
+                    <rect 
+                      x="115" 
+                      y="130" 
+                      width="25" 
+                      height="40" 
+                      rx="12.5" 
+                      fill="#3b0764" 
+                      style={{ 
+                        transformOrigin: '127px 150px',
+                        transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                        transform: isPasswordFocused ? 'translateY(-65px) rotate(-35deg) scale(1.3)' : 'translateY(0) rotate(0) scale(1)'
+                      }} 
+                    />
+                  </g>
+                </svg>
+              </div>
+
               <form onSubmit={handleSubmit} noValidate>
                 <div className={`auth-field${isRegister ? '' : ' hidden'}`}>
                   <label className="auth-label" htmlFor="name">
@@ -172,6 +265,8 @@ export function LoginPage() {
                     autoComplete={isRegister ? 'new-password' : 'current-password'}
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
+                    onFocus={coverEyes}
+                    onBlur={uncoverEyes}
                   />
                 </div>
                 <button
