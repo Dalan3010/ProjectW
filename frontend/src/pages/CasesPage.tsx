@@ -9,6 +9,7 @@ import { usePageMeta } from '../hooks/usePageMeta'
 import { timeAgo } from '../lib/time'
 import type { IdeaCase } from '../types/api'
 
+
 interface NormalizedCase {
   id: string
   title: string
