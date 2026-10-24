@@ -10,7 +10,7 @@ export function ProfilePage() {
 
   const { session } = useAuth();
   const [name, setName] = useState(session?.name || 'Usuario Demo');
-  const [email] = useState(session?.email || 'demo@bid.local');
+  const [email] = useState(session?.email || '');
   const [saved, setSaved] = useState(false);
 
   function handleSave(e: React.FormEvent) {

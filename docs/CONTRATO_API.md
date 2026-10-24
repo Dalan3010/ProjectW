@@ -261,6 +261,10 @@ Persistido en Postgres. Requiere Bearer y ownership del caso.
 `role`: `user` | `assistant`. `metadata` puede ser `null` (siempre lo será en
 mensajes de usuario).
 
+`metadata` es **opaco**: su forma la define el `ChatResponder`, no la capa HTTP.
+Claves actuales: `analysis`, `ideas`, `nextSteps` y `confidence`. `confidence`
+es una **fracción 0..1**; el frontend la presenta en porcentaje.
+
 Caso inexistente o ajeno → `404`.
 
 ### `GET /cases/{case_id}/messages?limit&offset` → `200`

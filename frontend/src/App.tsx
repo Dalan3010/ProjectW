@@ -4,6 +4,7 @@ import { CasesPage } from './pages/CasesPage'
 import { ChatPage } from './pages/ChatPage'
 import { LandingPage } from './pages/LandingPage'
 import { LoginPage } from './pages/LoginPage'
+import { ProfilePage } from './pages/ProfilePage'
 
 export function App() {
   return (
@@ -23,6 +24,14 @@ export function App() {
         element={
           <ProtectedRoute>
             <ChatPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/perfil"
+        element={
+          <ProtectedRoute>
+            <ProfilePage />
           </ProtectedRoute>
         }
       />

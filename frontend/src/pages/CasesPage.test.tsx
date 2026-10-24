@@ -6,22 +6,34 @@ import { AuthProvider } from '../context/AuthProvider'
 import { storage } from '../lib/storage'
 import { CasesPage } from './CasesPage'
 
-const cases = [
+const wireCases = [
   {
     id: 'c1',
+    owner_id: 'user-1',
     title: 'Marketplace de artesanos',
-    summary: 'Conectar artesanos con compradores.',
-    messageCount: 4,
-    updatedAt: new Date(Date.now() - 3_600_000).toISOString(),
+    description: 'Conectar artesanos con compradores.',
+    category: 'oportunidad',
+    status: 'new',
+    created_at: '2026-10-24T15:00:00+00:00',
+    updated_at: new Date(Date.now() - 3_600_000).toISOString(),
+    metadata: null,
   },
   {
     id: 'c2',
+    owner_id: 'user-1',
     title: 'App de reciclaje',
-    summary: 'Recompensas por reciclar.',
-    messageCount: 2,
-    updatedAt: new Date().toISOString(),
+    description: 'Recompensas por reciclar.',
+    category: null,
+    status: 'in_progress',
+    created_at: '2026-10-24T15:00:00+00:00',
+    updated_at: new Date().toISOString(),
+    metadata: null,
   },
 ]
+
+function listResponse() {
+  return { data: wireCases, total: wireCases.length, limit: 10, offset: 0 }
+}
 
 function jsonResponse(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -50,7 +62,7 @@ function renderCases() {
 
 describe('CasesPage', () => {
   beforeEach(() => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse({ data: cases })))
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse(listResponse())))
   })
 
   it('renders cases and filters them by search', async () => {
@@ -59,6 +71,7 @@ describe('CasesPage', () => {
 
     expect(await screen.findByText('Marketplace de artesanos')).toBeInTheDocument()
     expect(screen.getByText('App de reciclaje')).toBeInTheDocument()
+    expect(screen.getByText('Conectar artesanos con compradores.')).toBeInTheDocument()
     expect(screen.getByText('2 casos · Ordenados por actividad reciente')).toBeInTheDocument()
 
     await user.type(screen.getByPlaceholderText('Buscar por título o etiqueta...'), 'reciclaje')
@@ -72,7 +85,7 @@ describe('CasesPage', () => {
     const fetchMock = vi.fn(async (input: URL | RequestInfo, init?: RequestInit) => {
       const url = String(input)
       if (init?.method === 'DELETE') return new Response(null, { status: 204 })
-      if (url.includes('/cases')) return jsonResponse({ data: cases })
+      if (url.includes('/cases')) return jsonResponse(listResponse())
       return jsonResponse({})
     })
     vi.stubGlobal('fetch', fetchMock)
@@ -104,7 +117,7 @@ describe('CasesPage', () => {
   it('shows an error state when the API fails', async () => {
     vi.stubGlobal(
       'fetch',
-      vi.fn().mockResolvedValue(jsonResponse({ message: 'Servicio no disponible' }, 500)),
+      vi.fn().mockResolvedValue(jsonResponse({ detail: 'Servicio no disponible' }, 500)),
     )
 
     renderCases()

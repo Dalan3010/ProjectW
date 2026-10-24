@@ -27,7 +27,7 @@ function assessmentFromMeta(analysis: BackendAnalysis): AssessmentData {
     urgency: analysis.urgency,
     frequency: analysis.frequency,
     severity: analysis.severity,
-    willingnessToPay: analysis.willingnessToPlay,
+    willingnessToPay: analysis.willingnessToPay,
     targetSegment: analysis.targetSegment,
     risks: analysis.mainRisks ?? [],
     overallScore: analysis.overallScore,

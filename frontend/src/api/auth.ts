@@ -1,14 +1,35 @@
-import type { AuthResponse } from '../types/api'
+import type { AuthSession, AuthUser, WireTokenResponse, WireUser } from '../types/api'
 import { request } from './client'
 
+export function mapUser(wire: WireUser): AuthUser {
+  return {
+    id: wire.id,
+    name: wire.full_name,
+    email: wire.email,
+  }
+}
+
+function mapTokenResponse(wire: WireTokenResponse): AuthSession {
+  return {
+    accessToken: wire.access_token,
+    user: mapUser(wire.user),
+  }
+}
+
 export const authApi = {
-  login: (credentials: { email: string; password: string }) =>
-    request<AuthResponse>('/auth/login', { method: 'POST', body: credentials }),
+  login: async (credentials: { email: string; password: string }): Promise<AuthSession> =>
+    mapTokenResponse(
+      await request<WireTokenResponse>('/auth/login', { method: 'POST', body: credentials }),
+    ),
 
-  register: (data: { name: string; email: string; password: string }) =>
-    request<AuthResponse>('/auth/register', { method: 'POST', body: data }),
+  register: async (data: {
+    name: string
+    email: string
+    password: string
+  }): Promise<AuthSession> =>
+    mapTokenResponse(
+      await request<WireTokenResponse>('/auth/register', { method: 'POST', body: data }),
+    ),
 
-  logout: () => request<null>('/auth/logout', { method: 'POST' }),
-
-  me: () => request<AuthResponse>('/auth/me'),
+  me: async (): Promise<AuthUser> => mapUser(await request<WireUser>('/auth/me')),
 }

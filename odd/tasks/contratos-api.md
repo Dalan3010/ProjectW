@@ -99,16 +99,16 @@ Ambos endpoints exigen Bearer y verifican ownership del caso (404 si ajeno).
 - [x] T6 — Backend chat: implementación `ChatRepository` + caso de uso.
 - [x] T7 — Backend chat: schemas + router `GET`/`POST /cases/{id}/messages`
       con ownership.
-- [ ] T8 — Frontend: `types/api.ts` alineado al wire snake_case.
-- [ ] T9 — Frontend: `client.ts` (base URL `:8000`, leer `detail`).
-- [ ] T10 — Frontend: `auth.ts` (mapear `access_token`/`full_name`, quitar
+- [x] T8 — Frontend: `types/api.ts` alineado al wire snake_case.
+- [x] T9 — Frontend: `client.ts` (base URL `:8000`, leer `detail`).
+- [x] T10 — Frontend: `auth.ts` (mapear `access_token`/`full_name`, quitar
       llamada a logout, quitar bypass demo).
-- [ ] T11 — Frontend: `cases.ts` (`limit`/`offset`) y `chat.ts`
+- [x] T11 — Frontend: `cases.ts` (`limit`/`offset`) y `chat.ts`
       (`/cases/{id}/messages`).
-- [ ] T12 — Frontend: eliminar `setTimeout` artificiales en `LoginPage` y
+- [x] T12 — Frontend: eliminar `setTimeout` artificiales en `LoginPage` y
       `UserMenu`.
-- [ ] T13 — Frontend: resolver links muertos `/perfil` y `/historial`.
-- [ ] T14 — Actualizar los tests afectados por el contrato y verificar en verde.
+- [x] T13 — Frontend: resolver links muertos `/perfil` y `/historial`.
+- [x] T14 — Actualizar los tests afectados por el contrato y verificar en verde.
 
 ## Criterios de aceptación
 
@@ -151,6 +151,7 @@ Cada slice es un commit revisable independiente.
   tests 14/16.
 - Slice 1 (T1, T2): completada.
 - Slice 2 (T3–T7): completada. Backend de chat implementado y compilado.
+- Slice 3 (T8–T14): completada. Frontend alineado, demo eliminado, tests en verde.
 
 ## Evidencia
 
@@ -168,7 +169,13 @@ Cada slice es un commit revisable independiente.
   y con la forma exacta de `metadata` que espera el frontend.
 - Limitación: FastAPI y Alembic no están instalados en el entorno; no hubo
   import en runtime ni `alembic upgrade head`. Requiere Docker para el smoke real.
+- Frontend: `npx tsc -b --force` → 0; `npm run lint` → 0 sin warnings;
+  `npm test` → 6 archivos, **19/19 tests** en verde.
+- `grep -rn ":5678\|/webhook\|demo-token\|demo@bid.local" frontend/src` → 0.
+- Defectos detectados en la revisión del slice y corregidos: `confidence` se
+  renderizaba como `0.87%` (ahora fracción → porcentaje en el mapeador) y todos
+  los casos mostraban "0 mensajes" (ahora se omite el contador).
 
 ## Siguiente paso
 
-Slice 3: frontend alineado al contrato (T8–T14).
+Smoke real con Docker: `alembic upgrade head` + login + chat persistido. Luego n8n como `N8nResponder`.

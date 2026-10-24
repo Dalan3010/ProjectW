@@ -1,11 +1,11 @@
-// BID — HTTP client for the backend (n8n webhook).
+// BID — HTTP client for the FastAPI backend.
 // JSON in/out, automatic Bearer token, timeout, and a global 401 handler.
 
 import { storage } from '../lib/storage'
 import type { RequestOptions } from '../types/api'
 
 export const API_BASE_URL = (
-  import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:5678/webhook'
+  import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000'
 ).replace(/\/$/, '')
 
 const TIMEOUT_MS = 30_000
@@ -73,9 +73,6 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
   // session: let the login form show the server message instead of reloading.
   const isCredentialRequest = path === '/auth/login' || path === '/auth/register'
   if (response.status === 401 && !isCredentialRequest) {
-    if (token === 'demo-token') {
-      throw new ApiError('Sesión demo no disponible en modo sin servidor.', 401)
-    }
     clearToken()
     window.location.assign('/login')
     throw new ApiError('Tu sesión expiró. Inicia sesión de nuevo.', 401)
@@ -98,13 +95,17 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
 }
 
 function getApiError(data: unknown, response: Response): string {
-  if (
-    data !== null &&
-    typeof data === 'object' &&
-    'message' in data &&
-    typeof (data as { message: unknown }).message === 'string'
-  ) {
-    return (data as { message: string }).message
+  if (data !== null && typeof data === 'object' && 'detail' in data) {
+    const detail = (data as { detail: unknown }).detail
+
+    // FastAPI validation errors (422) send an array of issue objects.
+    if (Array.isArray(detail)) {
+      const first = detail[0] as { msg?: unknown } | undefined
+      if (first && typeof first.msg === 'string') return first.msg
+    } else if (typeof detail === 'string') {
+      return detail
+    }
   }
+
   return `Error del servidor (${response.status}).`
 }

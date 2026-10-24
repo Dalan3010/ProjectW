@@ -72,52 +72,22 @@ export function LoginPage() {
 
     setError('')
     setSubmitting(true)
-    
+
     // 1. Inicia la animación de "comerse el texto"
     setButtonStatus('eating')
 
     try {
-      // Simulamos un pequeño tiempo para que se vea la animación de comer
-      await new Promise(resolve => setTimeout(resolve, 1200))
-      
-      // 2. Cambia a estado de éxito (botón verde con check)
-      setButtonStatus('success')
-      
-      // Esperamos un momento para que el usuario vea el check verde
-      await new Promise(resolve => setTimeout(resolve, 800))
-
-      // 3. Ejecutamos la acción real
+      // 2. Ejecuta la operación real
       if (isRegister) {
         await register({ name, email, password })
       } else {
         await login(email, password)
       }
+
+      // 3. Cambia a estado de éxito (botón verde con check) al confirmarse
+      setButtonStatus('success')
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'No se pudo completar la operación.')
-      setButtonStatus('idle')
-    } finally {
-      setSubmitting(false)
-    }
-  }
-
-  async function handleDemoLogin() {
-    setError('')
-    setSubmitting(true)
-    setButtonStatus('eating')
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      setButtonStatus('success')
-      await new Promise(resolve => setTimeout(resolve, 800))
-
-      const demoEmail = 'demo@bid.local'
-      const demoPassword = 'demo1234'
-      try {
-        await login(demoEmail, demoPassword)
-      } catch {
-        await register({ name: 'Usuario Demo', email: demoEmail, password: demoPassword })
-      }
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'No se pudo iniciar sesión demo.')
       setButtonStatus('idle')
     } finally {
       setSubmitting(false)
@@ -378,16 +348,7 @@ export function LoginPage() {
                   </div>
                 </button>
               </form>
-              
-              <button
-                type="button"
-                className="btn btn-ghost btn-block"
-                style={{ marginTop: 12 }}
-                disabled={submitting}
-                onClick={() => void handleDemoLogin()}
-              >
-                Entrar como demo
-              </button>
+
               <p className="auth-error" hidden={!error}>
                 {error}
               </p>
