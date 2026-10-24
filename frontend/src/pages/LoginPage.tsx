@@ -7,6 +7,7 @@ import { useAuth } from '../context/auth-context'
 import { usePageMeta } from '../hooks/usePageMeta'
 
 type Mode = 'login' | 'register'
+type ButtonStatus = 'idle' | 'eating' | 'success'
 
 export function LoginPage() {
   const { session, login, register, logout } = useAuth()
@@ -16,6 +17,9 @@ export function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  
+  // Estado para la animación del botón
+  const [buttonStatus, setButtonStatus] = useState<ButtonStatus>('idle')
 
   // Estados para las animaciones del personaje
   const [isPasswordFocused, setIsPasswordFocused] = useState(false)
@@ -31,15 +35,14 @@ export function LoginPage() {
   function switchMode() {
     setMode(isRegister ? 'login' : 'register')
     setError('')
+    setButtonStatus('idle')
   }
 
   // Efecto para que los ojos sigan el mouse
   useEffect(() => {
-    // Si los ojos están tapados, no seguimos el mouse
     if (isPasswordFocused) return
 
     const handleMouseMove = (event: MouseEvent) => {
-      // Calculamos la posición del mouse relativa a la ventana para mover las pupilas (rango de -6px a 6px)
       const x = (event.clientX / window.innerWidth) * 12 - 6
       const y = (event.clientY / window.innerHeight) * 12 - 6
       setPupilPosition({ x, y })
@@ -49,10 +52,8 @@ export function LoginPage() {
     return () => window.removeEventListener('mousemove', handleMouseMove)
   }, [isPasswordFocused])
 
-  // Funciones para tapar/destapar ojos
   function coverEyes() {
     setIsPasswordFocused(true)
-    // Centramos las pupilas cuando se tapan los ojos
     setPupilPosition({ x: 0, y: 0 })
   }
 
@@ -71,7 +72,21 @@ export function LoginPage() {
 
     setError('')
     setSubmitting(true)
+    
+    // 1. Inicia la animación de "comerse el texto"
+    setButtonStatus('eating')
+
     try {
+      // Simulamos un pequeño tiempo para que se vea la animación de comer
+      await new Promise(resolve => setTimeout(resolve, 1200))
+      
+      // 2. Cambia a estado de éxito (botón verde con check)
+      setButtonStatus('success')
+      
+      // Esperamos un momento para que el usuario vea el check verde
+      await new Promise(resolve => setTimeout(resolve, 800))
+
+      // 3. Ejecutamos la acción real
       if (isRegister) {
         await register({ name, email, password })
       } else {
@@ -79,6 +94,7 @@ export function LoginPage() {
       }
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'No se pudo completar la operación.')
+      setButtonStatus('idle')
     } finally {
       setSubmitting(false)
     }
@@ -87,7 +103,12 @@ export function LoginPage() {
   async function handleDemoLogin() {
     setError('')
     setSubmitting(true)
+    setButtonStatus('eating')
     try {
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      setButtonStatus('success')
+      await new Promise(resolve => setTimeout(resolve, 800))
+
       const demoEmail = 'demo@bid.local'
       const demoPassword = 'demo1234'
       try {
@@ -97,6 +118,7 @@ export function LoginPage() {
       }
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'No se pudo iniciar sesión demo.')
+      setButtonStatus('idle')
     } finally {
       setSubmitting(false)
     }
@@ -160,14 +182,10 @@ export function LoginPage() {
               {/* Personaje animado con React States y CSS inline */}
               <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '25px' }}>
                 <svg viewBox="0 0 200 150" width="140" height="105" style={{ overflow: 'visible' }}>
-                  {/* Cuerpo del personaje principal */}
                   <rect x="40" y="20" width="120" height="130" rx="40" fill="#5b21b6" />
-                  
-                  {/* Fondo blanco de los Ojos */}
                   <circle cx="80" cy="70" r="12" fill="#ffffff" />
                   <circle cx="120" cy="70" r="12" fill="#ffffff" />
                   
-                  {/* Pupilas dinámicas (Siguen el mouse) */}
                   <g style={{
                     transform: `translate(${pupilPosition.x}px, ${pupilPosition.y}px)`,
                     transition: 'transform 0.1s ease-out'
@@ -176,7 +194,6 @@ export function LoginPage() {
                     <circle cx="120" cy="70" r="5" fill="#000000" />
                   </g>
                   
-                  {/* Boca */}
                   <path 
                     d={isPasswordFocused ? "M 95 100 Q 100 95 105 100" : "M 90 95 Q 100 105 110 95"} 
                     fill="none" 
@@ -186,7 +203,6 @@ export function LoginPage() {
                     style={{ transition: 'd 0.3s ease' }}
                   />
                   
-                  {/* Brazos dinámicos (Suben más y se expanden para cubrir mejor) */}
                   <g>
                     <rect 
                       x="60" 
@@ -269,18 +285,100 @@ export function LoginPage() {
                     onBlur={uncoverEyes}
                   />
                 </div>
+
+                {/* Estilos CSS para el botón animado */}
+                <style>{`
+                  .animated-submit-btn {
+                    position: relative;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 8px;
+                    overflow: hidden;
+                    transition: background-color 0.4s ease;
+                  }
+                  .animated-submit-btn.success {
+                    background-color: #22c55e !important; /* Verde al final */
+                    color: white;
+                    border-color: #22c55e !important;
+                  }
+                  .btn-content-wrapper {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                  }
+                  .btn-icon-lock {
+                    transition: transform 0.3s ease;
+                    z-index: 2;
+                    display: flex;
+                  }
+                  /* Animación de "comer" (temblar/abrir) */
+                  .animated-submit-btn.eating .btn-icon-lock {
+                    animation: chomp 0.3s infinite alternate;
+                  }
+                  @keyframes chomp {
+                    0% { transform: scale(1) rotate(0deg); }
+                    100% { transform: scale(1.2) rotate(-15deg); }
+                  }
+                  .btn-text-label {
+                    transition: all 0.5s cubic-bezier(0.5, -0.5, 0.5, 1.5);
+                    white-space: nowrap;
+                    opacity: 1;
+                    transform: translateX(0);
+                    max-width: 200px;
+                    margin-left: 8px;
+                  }
+                  /* El texto se desliza hacia la izquierda y desaparece */
+                  .animated-submit-btn.eating .btn-text-label {
+                    transform: translateX(-30px) scale(0.5);
+                    opacity: 0;
+                    max-width: 0;
+                    margin-left: 0;
+                  }
+                  .btn-icon-check {
+                    position: absolute;
+                    transform: scale(0);
+                    transition: transform 0.4s cubic-bezier(0.5, -0.5, 0.5, 1.5);
+                  }
+                  .animated-submit-btn.success .btn-icon-check {
+                    transform: scale(1);
+                  }
+                  .animated-submit-btn.success .btn-icon-lock,
+                  .animated-submit-btn.success .btn-text-label {
+                    opacity: 0;
+                    visibility: hidden;
+                  }
+                `}</style>
+
                 <button
                   type="submit"
-                  className="btn btn-primary btn-block auth-submit"
+                  className={`btn btn-primary btn-block auth-submit animated-submit-btn ${buttonStatus}`}
                   disabled={submitting}
                 >
-                  {submitting
-                    ? 'Procesando…'
-                    : isRegister
-                      ? 'Crear cuenta gratis'
-                      : 'Iniciar sesión'}
+                  <div className="btn-content-wrapper">
+                    {/* Ícono inicial (Un candado que hará de "boca") */}
+                    <div className="btn-icon-lock">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                      </svg>
+                    </div>
+                    
+                    {/* Texto que será "devorado" */}
+                    <span className="btn-text-label">
+                      {isRegister ? 'Crear cuenta gratis' : 'Iniciar sesión'}
+                    </span>
+                  </div>
+
+                  {/* Ícono de Check que aparece al final */}
+                  <div className="btn-icon-check">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                  </div>
                 </button>
               </form>
+              
               <button
                 type="button"
                 className="btn btn-ghost btn-block"
