@@ -93,13 +93,13 @@ export function UserMenu() {
                   setIsOpen(false);
                   setShowDeleteModal(true);
                 }}>
-                  <Icon name="delete" size={18} />
+                  <Icon name="trash" size={18} />
                   Eliminar cuenta
                 </button>
               </li>
               <li>
                 <button className="dropdown-item" onClick={handleLogout}>
-                  <Icon name="exit_to_app" size={18} />
+                  <Icon name="logout" size={18} />
                   Salir
                 </button>
               </li>
@@ -346,7 +346,7 @@ export function UserMenu() {
               >
                 <div className="btn-content-wrapper">
                   <div className="btn-icon-trash">
-                    <Icon name="delete" size={18} />
+                    <Icon name="trash" size={18} />
                   </div>
                   <span className="btn-text-label">
                     Eliminar cuenta
