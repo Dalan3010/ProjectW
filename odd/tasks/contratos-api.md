@@ -92,12 +92,12 @@ Ambos endpoints exigen Bearer y verifican ownership del caso (404 si ajeno).
       paginación, naming y reglas de auth.
 - [x] T2 — Reparar typecheck roto por `UserMenu.tsx` (iconos `history`,
       `delete`, `exit_to_app`, `warning` no existen en `IconName`).
-- [ ] T3 — Backend chat: entidad `ChatMessage` + `ChatRepository` (Protocol).
-- [ ] T4 — Backend chat: modelo ORM `chat_messages` + migración encadenada
+- [x] T3 — Backend chat: entidad `ChatMessage` + `ChatRepository` (Protocol).
+- [x] T4 — Backend chat: modelo ORM `chat_messages` + migración encadenada
       sobre `d7e2f9a4c1b3`.
-- [ ] T5 — Backend chat: puerto `ChatResponder` + `CannedResponder`.
-- [ ] T6 — Backend chat: implementación `ChatRepository` + caso de uso.
-- [ ] T7 — Backend chat: schemas + router `GET`/`POST /cases/{id}/messages`
+- [x] T5 — Backend chat: puerto `ChatResponder` + `CannedResponder`.
+- [x] T6 — Backend chat: implementación `ChatRepository` + caso de uso.
+- [x] T7 — Backend chat: schemas + router `GET`/`POST /cases/{id}/messages`
       con ownership.
 - [ ] T8 — Frontend: `types/api.ts` alineado al wire snake_case.
 - [ ] T9 — Frontend: `client.ts` (base URL `:8000`, leer `detail`).
@@ -150,6 +150,7 @@ Cada slice es un commit revisable independiente.
 - Baseline previo a cambios: typecheck **falla** (7 errores en `UserMenu.tsx`),
   tests 14/16.
 - Slice 1 (T1, T2): completada.
+- Slice 2 (T3–T7): completada. Backend de chat implementado y compilado.
 
 ## Evidencia
 
@@ -160,7 +161,14 @@ Cada slice es un commit revisable independiente.
   (ya existían).
 - `npx tsc -b --force` → exit 0.
 - `npm run lint` → exit 0 (1 warning preexistente en `UserMenu.tsx:43`).
+- Backend: `python3 -m compileall -q api/app api/alembic/versions` → exit 0.
+- Cadena Alembic: `a7c3e91f5d2b → b3f1a2c7d9e4 → c9d4e6b1a8f2 → d7e2f9a4c1b3 → e1a5c3f7b9d2`,
+  una sola head, lineal.
+- `CannedResponder` verificado determinista entre procesos (sha256, no `hash()`)
+  y con la forma exacta de `metadata` que espera el frontend.
+- Limitación: FastAPI y Alembic no están instalados en el entorno; no hubo
+  import en runtime ni `alembic upgrade head`. Requiere Docker para el smoke real.
 
 ## Siguiente paso
 
-Slice 2: backend de chat (T3–T7).
+Slice 3: frontend alineado al contrato (T8–T14).

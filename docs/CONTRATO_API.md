@@ -316,7 +316,6 @@ exista, se añade `N8nResponder` y se inyecta en composición.
 
 | Tema | Estado |
 |---|---|
-| `POST /cases/` devuelve 201 | Requiere `status_code=201` explícito en el router |
 | `/perfil` y `/historial` | Sin endpoint ni ruta; no forman parte del contrato |
 | Refresh token | No existe. Cuando expire, el usuario vuelve a `/login` |
 | Rate limiting | No existe |
