@@ -25,6 +25,61 @@ export function LandingPage() {
               Convierte tus ideas en oportunidades de negocio con ayuda de inteligencia
               artificial.
             </p>
+
+            {/* Flecha animada apuntando hacia abajo con SVG directo */}
+            <div 
+              onClick={() => {
+                const nextSection = document.getElementById('como-funciona');
+                if (nextSection) {
+                  nextSection.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
+              style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                marginTop: '40px',
+                marginLeft: 'auto',
+                marginRight: 'auto',
+                color: '#ffffff',
+                cursor: 'pointer',
+                width: '45px',
+                height: '45px',
+                borderRadius: '50%',
+                backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+                animation: 'bounceArrow 2s infinite',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
+              }}
+              title="Descubre más"
+            >
+              <svg 
+                width="24" 
+                height="24" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2.5" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+              >
+                <path d="M6 9l6 6 6-6" />
+              </svg>
+            </div>
+
+            <style>{`
+              @keyframes bounceArrow {
+                0%, 20%, 50%, 80%, 100% {
+                  transform: translateY(0);
+                }
+                40% {
+                  transform: translateY(8px);
+                }
+                60% {
+                  transform: translateY(4px);
+                }
+              }
+            `}</style>
           </div>
         </section>
 
