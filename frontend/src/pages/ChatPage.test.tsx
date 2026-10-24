@@ -6,6 +6,33 @@ import { AuthProvider } from '../context/AuthProvider'
 import { storage } from '../lib/storage'
 import { ChatPage } from './ChatPage'
 
+const wireCase = {
+  id: 'case-1',
+  owner_id: 'user-1',
+  title: 'Quiero digitalizar ferias',
+  description: 'Quiero digitalizar ferias',
+  category: null,
+  status: 'new',
+  created_at: '2026-10-24T15:00:00+00:00',
+  updated_at: '2026-10-24T15:00:00+00:00',
+  metadata: null,
+}
+
+function wireMessage(
+  role: 'user' | 'assistant',
+  content: string,
+  metadata: Record<string, unknown> | null = null,
+) {
+  return {
+    id: `${role}-1`,
+    case_id: 'case-1',
+    role,
+    content,
+    metadata,
+    created_at: '2026-10-24T15:00:00+00:00',
+  }
+}
+
 function jsonResponse(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
@@ -32,13 +59,23 @@ function renderChat(path = '/chat') {
 }
 
 describe('ChatPage', () => {
-  it('shows welcome prompts and starts a case with the first message', async () => {
-    const fetchMock = vi.fn().mockResolvedValue(
-      jsonResponse({
-        caseId: 'case-1',
-        message: { role: 'assistant', content: 'Contame más sobre el problema.' },
-      }),
-    )
+  it('creates a case and sends the first message through the case chat endpoint', async () => {
+    const fetchMock = vi.fn(async (input: URL | RequestInfo, init?: RequestInit) => {
+      const url = String(input)
+      if (init?.method === 'POST' && url.includes('/messages')) {
+        return jsonResponse(
+          {
+            user_message: wireMessage('user', 'Quiero digitalizar ferias'),
+            assistant_message: wireMessage('assistant', 'Contame más sobre el problema.'),
+          },
+          201,
+        )
+      }
+      if (init?.method === 'POST' && url.endsWith('/cases/')) {
+        return jsonResponse(wireCase, 201)
+      }
+      return jsonResponse({ data: [], total: 0, limit: 50, offset: 0 })
+    })
     vi.stubGlobal('fetch', fetchMock)
 
     const user = userEvent.setup()
@@ -57,29 +94,38 @@ describe('ChatPage', () => {
     expect(await screen.findByText('Contame más sobre el problema.')).toBeInTheDocument()
     expect(screen.getByText('Quiero digitalizar ferias')).toBeInTheDocument()
 
-    const [url, init] = fetchMock.mock.calls[0] as [URL, RequestInit]
-    expect(url.toString()).toContain('/chat/start')
-    expect(init.body).toBe(JSON.stringify({ message: 'Quiero digitalizar ferias' }))
+    const createCall = fetchMock.mock.calls[0]
+    expect(String(createCall?.[0])).toContain('/cases/')
+    const createInit = createCall?.[1] as RequestInit
+    expect(createInit.body).toBe(
+      JSON.stringify({
+        title: 'Quiero digitalizar ferias',
+        description: 'Quiero digitalizar ferias',
+      }),
+    )
+
+    const sendCall = fetchMock.mock.calls[1]
+    expect(String(sendCall?.[0])).toContain('/cases/case-1/messages')
+    const sendInit = sendCall?.[1] as RequestInit
+    expect(sendInit.body).toBe(JSON.stringify({ content: 'Quiero digitalizar ferias' }))
+
+    expect(fetchMock.mock.calls.some(([input]) => String(input).includes('/chat'))).toBe(false)
   })
 
   it('renders assistant metadata cards and history', async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValue(
-        jsonResponse([
-          { role: 'user', content: 'Una idea', timestamp: new Date().toISOString() },
-          {
-            role: 'assistant',
-            content: '## Diagnóstico\nTodo bien',
-            metadata: {
-              type: 'analysis',
-              confidence: 80,
+        jsonResponse({
+          data: [
+            wireMessage('user', 'Una idea'),
+            wireMessage('assistant', '## Diagnóstico\nTodo bien', {
               analysis: {
                 targetSegment: 'PYMEs',
                 urgency: 4,
                 frequency: 3,
                 severity: 2,
-                willingnessToPlay: 5,
+                willingnessToPay: 5,
                 mainRisks: ['Competencia'],
                 overallScore: 80,
               },
@@ -95,9 +141,13 @@ describe('ChatPage', () => {
                 },
               ],
               nextSteps: ['Validar con clientes'],
-            },
-          },
-        ]),
+              confidence: 0.8,
+            }),
+          ],
+          total: 2,
+          limit: 50,
+          offset: 0,
+        }),
       ),
     )
 

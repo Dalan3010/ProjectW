@@ -247,6 +247,38 @@ class FeedbackORM(Base):
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
 
+class ChatMessageORM(Base):
+    __tablename__ = "chat_messages"
+    __table_args__ = (
+        CheckConstraint(
+            "role IN ('user', 'assistant')",
+            name='ck_chat_messages_role',
+        ),
+        # El listado siempre filtra por caso y ordena por fecha ascendente.
+        Index('ix_chat_messages_case_created', 'case_id', 'created_at'),
+    )
+
+    id = _pk()
+    case_id = Column(
+        PG_UUID(as_uuid=True),
+        ForeignKey(
+            "idea_cases.id",
+            ondelete="CASCADE",
+            name="fk_chat_messages_case_id",
+        ),
+        nullable=False,
+    )
+    role = Column(String(20), nullable=False)
+    content = Column(Text, nullable=False)
+    # Renamed from metadata to avoid conflict with sqlalchemy.
+    metadata_json = Column(
+        "metadata", JSONB, nullable=False, server_default=text("'{}'::jsonb")
+    )
+    created_at = Column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
 #Índices con ORDER BY declarado: cubren el filtro y el orden del listado, así
 #Postgres no necesita ordenar en memoria. Se declaran acá porque necesitan el
 #`.desc()` de la columna, que `__table_args__` no expone de forma legible.

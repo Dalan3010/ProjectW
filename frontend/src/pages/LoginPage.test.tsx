@@ -5,6 +5,15 @@ import { describe, expect, it, vi } from 'vitest'
 import { AuthProvider } from '../context/AuthProvider'
 import { LoginPage } from './LoginPage'
 
+const wireUser = {
+  id: 'user-1',
+  full_name: 'Ana Pérez',
+  email: 'ana@example.com',
+  role: 'user',
+  is_active: true,
+  created_at: '2026-10-24T15:00:00+00:00',
+}
+
 function renderLogin() {
   return render(
     <MemoryRouter initialEntries={['/login']}>
@@ -20,10 +29,11 @@ describe('LoginPage', () => {
     const fetchMock = vi.fn().mockResolvedValue(
       new Response(
         JSON.stringify({
-          user: { name: 'Ana Pérez', email: 'ana@example.com' },
-          tokens: { accessToken: 'token-123' },
+          access_token: 'token-123',
+          token_type: 'bearer',
+          user: wireUser,
         }),
-        { status: 200, headers: { 'Content-Type': 'application/json' } },
+        { status: 201, headers: { 'Content-Type': 'application/json' } },
       ),
     )
     vi.stubGlobal('fetch', fetchMock)
@@ -32,6 +42,9 @@ describe('LoginPage', () => {
     renderLogin()
 
     expect(screen.getByRole('heading', { name: 'Bienvenido de vuelta' })).toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: 'Entrar como demo' }),
+    ).not.toBeInTheDocument()
 
     await user.click(screen.getByRole('link', { name: 'Regístrate gratis' }))
     expect(screen.getByRole('heading', { name: 'Crea tu cuenta' })).toBeInTheDocument()
@@ -54,7 +67,7 @@ describe('LoginPage', () => {
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValue(
-        new Response(JSON.stringify({ message: 'Credenciales inválidas' }), {
+        new Response(JSON.stringify({ detail: 'Credenciales inválidas' }), {
           status: 401,
           headers: { 'Content-Type': 'application/json' },
         }),

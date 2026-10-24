@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
-from app.presentation.api import auth, cases
+from app.presentation.api import auth, cases, messages
 
 app = FastAPI(
     title="Jak Business Idea Discovery API",
@@ -19,6 +19,7 @@ app.add_middleware(
 )
 
 app.include_router(cases.router)
+app.include_router(messages.router)
 app.include_router(auth.router)
 
 @app.get("/")

@@ -1,4 +1,4 @@
-// BID — authentication against the real backend (n8n webhook).
+// BID — authentication against the FastAPI backend.
 // The access token lives in storage so the HTTP client can attach it as Bearer.
 
 import { authApi } from '../api/auth'
@@ -7,8 +7,6 @@ import type { AuthUser, Session } from '../types/api'
 import { storage } from './storage'
 
 const SESSION_KEY = 'session'
-const DEMO_EMAIL = 'demo@bid.local'
-const DEMO_PASSWORD = 'demo1234'
 
 function saveSession(user: AuthUser, accessToken: string): Session {
   const session: Session = {
@@ -19,18 +17,6 @@ function saveSession(user: AuthUser, accessToken: string): Session {
   }
   storage.set(SESSION_KEY, session)
   setToken(accessToken)
-  return session
-}
-
-function createDemoSession(): Session {
-  const session: Session = {
-    name: 'Usuario Demo',
-    email: DEMO_EMAIL,
-    accessToken: 'demo-token',
-    loginAt: new Date().toISOString(),
-  }
-  storage.set(SESSION_KEY, session)
-  setToken(session.accessToken)
   return session
 }
 
@@ -49,9 +35,6 @@ export const authService = {
     }
 
     const email = input.email.trim().toLowerCase()
-    if (email === DEMO_EMAIL) {
-      return createDemoSession()
-    }
 
     try {
       const response = await authApi.register({
@@ -59,9 +42,8 @@ export const authService = {
         email,
         password: input.password,
       })
-      return saveSession(response.user, response.tokens.accessToken)
+      return saveSession(response.user, response.accessToken)
     } catch (cause) {
-      if (email === DEMO_EMAIL) return createDemoSession()
       if (cause instanceof ApiError) throw cause
       throw new Error('No se pudo conectar con el servidor. Verificá tu conexión.')
     }
@@ -69,28 +51,21 @@ export const authService = {
 
   async login(email: string, password: string): Promise<Session> {
     const normalizedEmail = email.trim().toLowerCase()
-    if (normalizedEmail === DEMO_EMAIL && password === DEMO_PASSWORD) {
-      return createDemoSession()
-    }
 
     try {
       const response = await authApi.login({
         email: normalizedEmail,
         password,
       })
-      return saveSession(response.user, response.tokens.accessToken)
+      return saveSession(response.user, response.accessToken)
     } catch (cause) {
-      if (normalizedEmail === DEMO_EMAIL && password === DEMO_PASSWORD) {
-        return createDemoSession()
-      }
       if (cause instanceof ApiError) throw cause
       throw new Error('No se pudo conectar con el servidor. Verificá tu conexión.')
     }
   },
 
   logout(): void {
-    // Best effort: the local session closes even when the backend is down.
-    void authApi.logout().catch(() => {})
+    // Stateless JWT: logout is purely local, there is no endpoint to call.
     storage.remove(SESSION_KEY)
     clearToken()
   },

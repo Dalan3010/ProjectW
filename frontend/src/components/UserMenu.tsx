@@ -7,9 +7,7 @@ import { useAuth } from '../context/auth-context';
 export function UserMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [deleting, setDeleting] = useState(false);
-  const [deleteStatus, setDeleteStatus] = useState<'idle' | 'eating' | 'success'>('idle');
-  
+
   const menuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { session, logout } = useAuth(); 
@@ -26,27 +24,6 @@ export function UserMenu() {
   }, []);
 
   const userInitial = session?.name ? session.name.charAt(0).toUpperCase() : 'U';
-
-  async function handleDeleteAccount() {
-    if (deleting) return;
-    setDeleting(true);
-    setDeleteStatus('eating');
-
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      setDeleteStatus('success');
-      await new Promise(resolve => setTimeout(resolve, 800));
-
-      setShowDeleteModal(false);
-      logout();
-      navigate('/login');
-    } catch (error) {
-      console.error("Error al eliminar la cuenta");
-      setDeleteStatus('idle');
-    } finally {
-      setDeleting(false);
-    }
-  }
 
   function handleLogout() {
     setIsOpen(false);
@@ -81,25 +58,19 @@ export function UserMenu() {
                   Administrar usuario
                 </Link>
               </li>
-              <li>
-                <Link to="/historial" className="dropdown-item" onClick={() => setIsOpen(false)}>
-                  <Icon name="history" size={18} />
-                  Ver historial
-                </Link>
-              </li>
               <li className="dropdown-divider"></li>
               <li>
                 <button className="dropdown-item text-danger" onClick={() => {
                   setIsOpen(false);
                   setShowDeleteModal(true);
                 }}>
-                  <Icon name="delete" size={18} />
+                  <Icon name="trash" size={18} />
                   Eliminar cuenta
                 </button>
               </li>
               <li>
                 <button className="dropdown-item" onClick={handleLogout}>
-                  <Icon name="exit_to_app" size={18} />
+                  <Icon name="logout" size={18} />
                   Salir
                 </button>
               </li>
@@ -221,7 +192,7 @@ export function UserMenu() {
       {showDeleteModal && createPortal(
         <div 
           onClick={(e) => {
-            if (e.target === e.currentTarget && !deleting) setShowDeleteModal(false);
+            if (e.target === e.currentTarget) setShowDeleteModal(false);
           }}
           style={{
             position: 'fixed',
@@ -262,6 +233,10 @@ export function UserMenu() {
             
             <p style={{ fontSize: '14px', color: '#a1a1aa', marginBottom: '24px', lineHeight: '1.5' }}>
               ¿Estás seguro de que quieres eliminar tu cuenta? Perderás acceso a todos tus casos e historial. Esta acción no se puede deshacer.
+            </p>
+
+            <p style={{ fontSize: '13px', color: '#fbbf24', marginBottom: '24px', lineHeight: '1.5' }}>
+              La eliminación de cuentas todavía no está disponible.
             </p>
             
             <style>{`
@@ -331,7 +306,6 @@ export function UserMenu() {
                 type="button" 
                 className="btn btn-ghost" 
                 onClick={() => setShowDeleteModal(false)}
-                disabled={deleting}
                 style={{ flex: 1 }}
               >
                 Cancelar
@@ -339,14 +313,13 @@ export function UserMenu() {
               
               <button
                 type="button"
-                className={`btn btn-danger animated-delete-user-btn ${deleteStatus}`}
-                onClick={handleDeleteAccount}
-                disabled={deleting}
+                className="btn btn-danger animated-delete-user-btn"
+                disabled
                 style={{ flex: 1 }}
               >
                 <div className="btn-content-wrapper">
                   <div className="btn-icon-trash">
-                    <Icon name="delete" size={18} />
+                    <Icon name="trash" size={18} />
                   </div>
                   <span className="btn-text-label">
                     Eliminar cuenta

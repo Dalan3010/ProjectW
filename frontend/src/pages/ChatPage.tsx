@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { chatApi } from '../api/chat'
-import { getToken } from '../api/client'
 import { AppNavbar } from '../components/AppNavbar'
 import { Icon } from '../components/Icon'
 import { AssistantContent } from '../components/chat/AssistantContent'
@@ -85,13 +84,6 @@ function BotMessage({ message }: { message: ChatMessage }) {
   )
 }
 
-const DEMO_CHAT_RESPONSES = [
-  'Me gusta la idea. Vamos a validar el problema: ¿A quién le duele esto hoy y cómo lo resuelve ahora?',
-  'Perfecto. Te dejo un primer análisis rápido: hay oportunidad, pero conviene hablar con 2-3 clientes potenciales antes de invertir.',
-  'Vamos por partes. ¿Qué resultado esperás obtener si este negocio funcionara? Eso nos ayuda a enfocar la validación.',
-  'Buena observación. ¿Cuál sería la solución mínima que podrías probar esta semana sin mucho costo?',
-]
-
 export function ChatPage() {
   usePageMeta('Chat — BID', 'Conversa con BID para validar tu idea de negocio.')
 
@@ -103,7 +95,6 @@ export function ChatPage() {
   const [input, setInput] = useState('')
   const [processing, setProcessing] = useState(false)
   const [loadingCase, setLoadingCase] = useState(false)
-  const demoCountRef = useRef(0)
 
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
@@ -122,18 +113,6 @@ export function ChatPage() {
     }
 
     setActiveCaseId(casoId)
-    if (getToken() === 'demo-token') {
-      setLoadingCase(false)
-      setMessages([
-        {
-          role: 'assistant',
-          content:
-            'Este es un caso de demostración. Podés seguir conversando para probar el flujo.',
-          timestamp: new Date().toISOString(),
-        },
-      ])
-      return
-    }
     setLoadingCase(true)
 
     chatApi
@@ -181,36 +160,16 @@ export function ChatPage() {
       { role: 'user', content, timestamp: new Date().toISOString() },
     ])
 
-    if (getToken() === 'demo-token') {
-      window.setTimeout(() => {
-        if (!activeCaseId) {
-          const id = `demo-chat-${Date.now()}`
-          setActiveCaseId(id)
-        }
-        demoCountRef.current += 1
-        const response =
-          DEMO_CHAT_RESPONSES[(demoCountRef.current - 1) % DEMO_CHAT_RESPONSES.length]
-        setMessages((current) => [
-          ...current,
-          {
-            role: 'assistant',
-            content: response,
-            timestamp: new Date().toISOString(),
-          },
-        ])
-        setProcessing(false)
-      }, 400)
-      return
-    }
-
     try {
       if (!activeCaseId) {
         const response = await chatApi.startCase(content)
         setActiveCaseId(response.caseId)
-        setMessages((current) => [...current, response.message])
+        // The user's bubble is already shown optimistically; only add the reply.
+        const reply = response.messages.find((message) => message.role === 'assistant')
+        if (reply) setMessages((current) => [...current, reply])
       } else {
         const response = await chatApi.sendMessage({ caseId: activeCaseId, content })
-        setMessages((current) => [...current, response.message])
+        setMessages((current) => [...current, response.assistantMessage])
       }
     } catch (cause) {
       const detail = cause instanceof Error ? cause.message : 'Error desconocido'

@@ -22,7 +22,7 @@ async def get_idea_case_use_case(db: AsyncSession = Depends(get_db)) -> CreateId
     repo = SQLAlchemyIdeaCaseRepository(db)
     return CreateIdeaCaseUseCase(repo)
 
-@router.post("/", response_model=IdeaCaseResponseSchema)
+@router.post("/", response_model=IdeaCaseResponseSchema, status_code=status.HTTP_201_CREATED)
 async def create_case(
     dto: CreateIdeaCaseDTO,
     current_user: User = Depends(get_current_user),
