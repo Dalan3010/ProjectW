@@ -2113,3 +2113,11 @@ main,
   from { opacity: 0; transform: translateY(12px) scale(0.97); }
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
+
+/* Keyboard focus visibility for interactive chrome */
+.nav-link:focus-visible,
+.footer-link:focus-visible,
+.btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
