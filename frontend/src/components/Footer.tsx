@@ -1,5 +1,7 @@
 import type { MouseEvent } from 'react'
 
+const CURRENT_YEAR = new Date().getFullYear()
+
 function preventNavigation(event: MouseEvent<HTMLAnchorElement>) {
   event.preventDefault()
 }
@@ -8,7 +10,7 @@ export function Footer() {
   return (
     <footer className="footer">
       <div className="container footer-container">
-        <span className="footer-copy">BID © 2026</span>
+        <span className="footer-copy">BID © {CURRENT_YEAR}</span>
         <div className="footer-links">
           <a href="#" data-fake className="footer-link" onClick={preventNavigation}>
             Privacidad
