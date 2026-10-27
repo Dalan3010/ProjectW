@@ -151,7 +151,7 @@ export function LoginPage() {
             <>
               {/* Personaje animado con React States y CSS inline */}
               <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '25px' }}>
-                <svg viewBox="0 0 200 150" width="140" height="105" style={{ overflow: 'visible' }}>
+                <svg viewBox="0 0 200 150" width="140" height="105" aria-hidden="true" style={{ overflow: 'visible' }}>
                   <rect x="40" y="20" width="120" height="130" rx="40" fill="#5b21b6" />
                   <circle cx="80" cy="70" r="12" fill="#ffffff" />
                   <circle cx="120" cy="70" r="12" fill="#ffffff" />
@@ -328,7 +328,7 @@ export function LoginPage() {
                   <div className="btn-content-wrapper">
                     {/* Ícono inicial (Un candado que hará de "boca") */}
                     <div className="btn-icon-lock">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                         <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                       </svg>
@@ -342,7 +342,7 @@ export function LoginPage() {
 
                   {/* Ícono de Check que aparece al final */}
                   <div className="btn-icon-check">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="20 6 9 17 4 12"></polyline>
                     </svg>
                   </div>
