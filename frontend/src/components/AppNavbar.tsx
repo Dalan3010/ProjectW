@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/auth-context'
 import { Brand } from './Brand'
-import { UserMenu } from './UserMenu' // <-- Asegúrate de que esta línea esté aquí
+import { UserMenu } from './UserMenu'
 
 interface AppNavbarProps {
   active: 'casos' | 'chat'
@@ -23,10 +23,7 @@ export function AppNavbar({ active }: AppNavbarProps) {
           <Link to="/chat" className={`nav-link${active === 'chat' ? ' active' : ''}`}>
             Nueva conversación
           </Link>
-          
-          {/* El nuevo menú debe estar justo aquí */}
           <UserMenu />
-          
         </div>
       </div>
     </nav>
