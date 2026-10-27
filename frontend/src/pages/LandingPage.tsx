@@ -27,11 +27,20 @@ export function LandingPage() {
             </p>
 
             {/* Flecha animada apuntando hacia abajo con SVG directo */}
-            <div 
+            <div
+              role="button"
+              tabIndex={0}
+              aria-label="Ir a la sección cómo funciona"
               onClick={() => {
                 const nextSection = document.getElementById('como-funciona');
                 if (nextSection) {
                   nextSection.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  document.getElementById('como-funciona')?.scrollIntoView({ behavior: 'smooth' });
                 }
               }}
               style={{
